@@ -1,0 +1,8 @@
+### Hello
+GET http://localhost:8080/api/v1/hello
+
+### 전역 예외 처리
+GET http://localhost:8080/api/v1/error
+
+### 커스텀 예외 처리
+GET http://localhost:8080/api/v1/custom-error
