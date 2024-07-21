@@ -7,14 +7,12 @@ server:
       charset: utf-8
       force: true
 
-
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${rds.hostname}:${rds.port}/${rds.db.name}
     username: ${rds.username}
     password: ${rds.password}
-
   jpa:
     open-in-view: false
     hibernate:
@@ -22,8 +20,6 @@ spring:
     properties:
       hibernate:
         default_batch_fetch_size: 100
-
-
 
 logging:
   level:
