@@ -18,8 +18,6 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    private final SlackApi slackApi;
-
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponseDto> handleBusinessException(CustomException e) {
         ErrorResponseDto responseDto = new ErrorResponseDto(e.getErrorCode().getCode(), e.getMessage(), null);
