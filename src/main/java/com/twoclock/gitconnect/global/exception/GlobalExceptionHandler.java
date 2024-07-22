@@ -3,8 +3,6 @@ package com.twoclock.gitconnect.global.exception;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.global.slack.annotation.SlackNotification;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-import net.gpedro.integrations.slack.SlackApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -12,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RequiredArgsConstructor
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
