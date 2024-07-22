@@ -48,7 +48,6 @@ public class SlackNotificationAspect {
         slackAttachment.setTitle("Error Log");
         slackAttachment.setTitleLink(request.getContextPath());
         slackAttachment.setText(Arrays.toString(e.getStackTrace()));
-        slackAttachment.setColor("danger");
         slackAttachment.setFields(
                 Arrays.asList(
                         new SlackField().setTitle("Request URL").setValue(request.getRequestURL().toString()),
