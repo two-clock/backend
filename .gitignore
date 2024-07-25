@@ -36,7 +36,10 @@ out/
 ### VS Code ###
 .vscode/
 
-### application ###
+### Application ###
 application.yml
 application-dev.yml
 application-local.yml
+
+### Docker ###
+mysql-data/
