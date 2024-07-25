@@ -44,6 +44,9 @@ dependencies {
     // Database
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // Slack-Api
+    implementation 'net.gpedro.integrations.slack:slack-webhook:1.4.0'
 }
 
 tasks.named('test') {

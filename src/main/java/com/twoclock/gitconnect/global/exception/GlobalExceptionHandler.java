@@ -1,6 +1,8 @@
 package com.twoclock.gitconnect.global.exception;
 
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.twoclock.gitconnect.global.slack.annotation.SlackNotification;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,8 +24,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseDto, e.getErrorCode().getHttpStatus());
     }
 
+    @SlackNotification
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleException(Exception e) {
+    public ResponseEntity<ErrorResponseDto> handleException(HttpServletRequest request, Exception e) {
         ErrorResponseDto responseDto =
                 new ErrorResponseDto(
                         ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
