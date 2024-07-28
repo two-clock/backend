@@ -78,7 +78,96 @@
 
 ## ERD
 
-- 준비중
+```mermaid
+erDiagram
+    Member {
+        int id PK "ID"
+        string token UK "회원 토큰"
+        string nickname "닉네임"
+        string profile_url "프로필 이미지 URL"
+        string role "권한"
+        date created_date_time "생성일자"
+        date modified_date_time "수정일자"
+    }
+
+    Member_Login_History {
+        int id PK "ID"
+        int member_id FK "회원 ID"
+        date login_date_time "로그인 일자"
+    }
+
+    Member_Ban {
+        int id PK "ID"
+        int member_id FK "회원 ID"
+        string reason "정지 사유"
+        date start_date_time "정지 시작일"
+        date end_date_time "정지 종료일"
+    }
+
+    Page_View_History {
+        int id PK "ID"
+        string category "카테고리 코드"
+        int count "카운트"
+        date created_date_time "생성일자"
+    }
+
+    Board {
+        int id PK "ID"
+        int member_id FK "작성자 ID"
+        string nickname "작성자 닉네임"
+        string title "제목"
+        string content "내용"
+        boolean is_view "조회 가능 여부"
+        date created_date_time "생성일자"
+        date modified_date_time "수정일자"
+    }
+
+    Comment {
+        int id PK "ID"
+        int board_id FK "게시판 ID"
+        int member_id FK "작성자 ID"
+        string nickname "작성자 닉네임"
+        string content "내용"
+        boolean is_view "조회 가능 여부"
+        date created_date_time "생성일자"
+        date modified_date_time "수정일자"
+    }
+
+    Board_File {
+        int id PK "ID"
+        int board_id FK "게시판 ID"
+        string original_name "파일 원본 이름"
+        string uuid "UUID"
+        string save_path "저장 경로"
+        string extension "파일 확장자"
+        date created_date_time "생성일자"
+        date modified_date_time "수정일자"
+    }
+
+    Mail_Form {
+        int id PK "ID"
+        string title "폼 제목"
+        string content "폼 내용"
+        string code "코드"
+        date created_date_time "생성일자"
+    }
+
+    Mail_Send_History {
+        int id PK "ID"
+        string title "메일 제목"
+        string content "메일 내용"
+        string code "코드"
+        boolean is_success "발송 성공 여부"
+        date send_date_time "발송일자"
+    }
+
+    Member ||--o{ Member_Login_History: ""
+    Member ||--o{ Member_Ban: ""
+    Member ||--o{ Board: ""
+    Member ||--o{ Comment: ""
+    Board ||--o{ Board_File: ""
+    Board ||--o{ Comment: ""
+```
 
 ## API 명세서
 
