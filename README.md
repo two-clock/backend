@@ -106,7 +106,7 @@ erDiagram
 
     Page_View_History {
         int id PK "ID"
-        string category "카테고리 코드"
+        string category "카테고리"
         int count "카운트"
         date created_date_time "생성일자"
     }
@@ -115,6 +115,7 @@ erDiagram
         int id PK "ID"
         int member_id FK "작성자 ID"
         string nickname "작성자 닉네임"
+        string category "카테고리"
         string title "제목"
         string content "내용"
         boolean is_view "조회 가능 여부"
