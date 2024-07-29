@@ -84,7 +84,7 @@ erDiagram
         int id PK "ID"
         string token UK "회원 토큰"
         string nickname "닉네임"
-        string profile_url "프로필 이미지 URL"
+        string profile_image_url "프로필 이미지 URL"
         string role "권한"
         date created_date_time "생성일자"
         date modified_date_time "수정일자"
