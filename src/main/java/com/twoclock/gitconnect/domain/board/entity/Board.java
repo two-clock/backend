@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.w3c.dom.Text;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -33,7 +34,7 @@ public class Board extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
     @Column(nullable = false)
