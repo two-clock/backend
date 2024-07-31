@@ -33,10 +33,10 @@ public class Comment extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private String isView;
+    private boolean isView = true;
 
     @Builder
-    public Comment(Board board, Member member, String nickname, String content, String isView) {
+    public Comment(Board board, Member member, String nickname, String content, boolean isView) {
         this.board = board;
         this.member = member;
         this.nickname = nickname;

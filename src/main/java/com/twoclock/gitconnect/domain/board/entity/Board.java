@@ -38,10 +38,10 @@ public class Board extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private String isView;
+    private boolean isView = true;
 
     @Builder
-    public Board(Member member, String nickname, Category category, String title, String content, String isView) {
+    public Board(Member member, String nickname, Category category, String title, String content, boolean isView) {
         this.member = member;
         this.nickname = nickname;
         this.category = category;
