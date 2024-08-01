@@ -9,11 +9,15 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.w3c.dom.Text;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@SQLDelete(sql = "UPDATE board SET is_view = false WHERE id = ?")
+@Where(clause = "is_view = true")
 public class Board extends BaseEntity {
 
     @Id
