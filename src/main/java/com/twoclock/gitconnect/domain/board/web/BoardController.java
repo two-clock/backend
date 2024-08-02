@@ -23,9 +23,12 @@ public class BoardController {
     @PostMapping("")
     public ResponseEntity<?> saveBoard(@RequestBody @Valid BoardSaveReqDto boardSaveReqDto,
                                        BindingResult bindingResult) throws BindException {
+        // TODO : 로그인 유저인지 검증 필요
+        Long userId = 100L;
 
+        // TODO : BindException 핸들링 필요
 
-
-        return ResponseEntity.ok().build();
+        return  boardService.saveBoard(boardSaveReqDto, userId);
+        // TODO : 공통 ResponseDTO(코드, 상태값, 객체) 생성 필요
     }
 }
