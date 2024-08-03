@@ -19,7 +19,7 @@ public class RestResponse extends ResponseEntity<HttpResponse<?>> {
     public static RestResponse OK() {
         // no data return
         HttpResponse<?> response = HttpResponse.builder()
-                .httpStatus(HttpStatus.OK)
+                .httpStatus(HttpStatus.OK.value())
                 .message(HttpStatus.OK.getReasonPhrase())
                 .build();
         return new RestResponse(response, HttpStatus.OK);
@@ -28,7 +28,7 @@ public class RestResponse extends ResponseEntity<HttpResponse<?>> {
     // 성공 응답 데이터 반환처리
     public RestResponse(Object resultData) {
         super(HttpResponse.builder()
-                .httpStatus(HttpStatus.OK)
+                .httpStatus(HttpStatus.OK.value())
                 .message("OK")
                 .data(resultData)
                 .build(), HttpStatus.OK);
@@ -37,7 +37,7 @@ public class RestResponse extends ResponseEntity<HttpResponse<?>> {
     // 성공 응답(헤더 반환처리)
     public RestResponse(Object resultData, HttpHeaders headers) {
         super(HttpResponse.builder()
-                .httpStatus(HttpStatus.OK)
+                .httpStatus(HttpStatus.OK.value())
                 .message("OK")
                 .data(resultData)
                 .build(), headers, HttpStatus.OK);
