@@ -4,6 +4,7 @@ import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
+import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
@@ -31,6 +32,7 @@ public class BoardService {
         Board board = Board.builder()
                 .title(boardSaveReqDto.title())
                 .content(boardSaveReqDto.content())
+                .nickname(member.getNickname())
                 .category(code)
                 .member(member)
                 .build();

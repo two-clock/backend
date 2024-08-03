@@ -24,7 +24,7 @@ public class BoardController {
     public ResponseEntity<?> saveBoard(@RequestBody @Valid BoardSaveReqDto boardSaveReqDto,
                                        BindingResult bindingResult) throws BindException {
         // TODO : 로그인 유저인지 검증 필요
-        Long userId = 100L;
+        Long userId = 1L;
 
         // TODO : BindException 핸들링 필요
 
