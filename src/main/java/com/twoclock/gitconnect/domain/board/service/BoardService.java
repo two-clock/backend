@@ -8,6 +8,7 @@ import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.twoclock.gitconnect.global.model.RestResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class BoardService {
                 .build();
 
         boardRepository.save(board);
-        return ResponseEntity.ok().build();
+        return RestResponse.OK();
         // TODO : 성공 여부만 넘길 것인지, 생성 객체를 넘길 것인지 협의 필요
     }
 }
