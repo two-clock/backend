@@ -1,6 +1,5 @@
 package com.twoclock.gitconnect.domain.board.web;
 
-import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto;
 import com.twoclock.gitconnect.domain.board.service.BoardService;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.model.RestResponse;

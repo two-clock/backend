@@ -1,19 +1,16 @@
 package com.twoclock.gitconnect.domain.board.service;
 
+import com.twoclock.gitconnect.domain.board.dto.BoardReqeustDto.BoardSaveReqDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
-import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
-import com.twoclock.gitconnect.global.model.RestResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.twoclock.gitconnect.domain.board.dto.BoardReqeustDto.*;
-import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor

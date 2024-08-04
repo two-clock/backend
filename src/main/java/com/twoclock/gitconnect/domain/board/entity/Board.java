@@ -2,7 +2,6 @@ package com.twoclock.gitconnect.domain.board.entity;
 
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.member.entity.Member;
-import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
-import org.w3c.dom.Text;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
