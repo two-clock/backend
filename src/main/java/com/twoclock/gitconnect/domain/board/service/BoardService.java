@@ -1,7 +1,7 @@
 package com.twoclock.gitconnect.domain.board.service;
 
-import com.twoclock.gitconnect.domain.board.dto.BoardReqeustDto.BoardSaveReqDto;
-import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardReqeustDto.*;
+import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
@@ -23,6 +23,7 @@ public class BoardService {
 
     @Transactional
     public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, Long userId) {
+
         Member member = memberRepository.findById(userId).orElseThrow(
                 ()-> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
@@ -37,5 +38,20 @@ public class BoardService {
                 .build();
         Board boardPS = boardRepository.save(board);
         return new BoardRespDto(boardPS);
+    }
+
+    @Transactional
+    public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long userId) {
+
+        Member member = memberRepository.findById(userId).orElseThrow(
+                ()-> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+        );
+        Board board = boardRepository.findById(boardUpdateReqDto.id()).orElseThrow(
+                ()-> new CustomException(ErrorCode.NOT_FOUND_BOARD)
+        );
+        board.checkUserId(member.getId());
+        board.updateBoard(boardUpdateReqDto.title(), boardUpdateReqDto.content());
+
+        return new BoardRespDto(board);
     }
 }

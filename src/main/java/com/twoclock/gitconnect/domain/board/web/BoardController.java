@@ -5,10 +5,7 @@ import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.twoclock.gitconnect.domain.board.dto.BoardReqeustDto.*;
 import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
 import static com.twoclock.gitconnect.global.exception.constants.ErrorCode.*;
@@ -28,7 +25,20 @@ public class BoardController {
         BoardRespDto boardRespDto = boardService.saveBoard(boardSaveReqDto, userId);
         if(boardRespDto == null) throw new CustomException(FAIL_SAVE_BOARD);
 
-        return RestResponse.OK();
-//        return new RestResponse(boardRespDto);
+//        return RestResponse.OK();
+        return new RestResponse(boardRespDto);
     }
+
+    @PutMapping
+    public RestResponse updateBoard(@RequestBody @Valid BoardModifyReqDto boardUpdateReqDto) {
+        // TODO : 로그인 유저인지 검증 필요
+        Long userId = 1L;
+
+        BoardRespDto boardRespDto = boardService.modifyBoard(boardUpdateReqDto, userId);
+        if (boardRespDto == null) throw new CustomException(FAIL_SAVE_BOARD);
+
+//        return RestResponse.OK();
+        return new RestResponse(boardRespDto);
+    }
+
 }
