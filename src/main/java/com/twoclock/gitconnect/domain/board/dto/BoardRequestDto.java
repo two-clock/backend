@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public class BoardReqeustDto {
+public class BoardRequestDto {
 
     public record BoardSaveReqDto(
             @Size(max = 50, message = "제목은 50자 이내로 작성해주세요.")

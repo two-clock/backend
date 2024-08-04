@@ -1,6 +1,6 @@
 package com.twoclock.gitconnect.domain.board.service;
 
-import com.twoclock.gitconnect.domain.board.dto.BoardReqeustDto.*;
+import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.*;
 import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;

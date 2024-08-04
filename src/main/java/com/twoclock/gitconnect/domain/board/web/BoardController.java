@@ -6,7 +6,7 @@ import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import com.twoclock.gitconnect.domain.board.dto.BoardReqeustDto.*;
+import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.*;
 import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
 import static com.twoclock.gitconnect.global.exception.constants.ErrorCode.*;
 
