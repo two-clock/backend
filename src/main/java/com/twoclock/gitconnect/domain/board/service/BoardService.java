@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.twoclock.gitconnect.domain.board.dto.BoardReqeustDto.*;
+import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class BoardService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public ResponseEntity<?> saveBoard(BoardSaveReqDto boardSaveReqDto, Long userId) {
+    public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, Long userId) {
         Member member = memberRepository.findById(userId).orElseThrow(
                 ()-> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
@@ -37,9 +38,7 @@ public class BoardService {
                 .category(code)
                 .member(member)
                 .build();
-
-        boardRepository.save(board);
-        return RestResponse.OK();
-        // TODO : 성공 여부만 넘길 것인지, 생성 객체를 넘길 것인지 협의 필요
+        Board boardPS = boardRepository.save(board);
+        return new BoardRespDto(boardPS);
     }
 }
