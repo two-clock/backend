@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 
 @Builder
 public record HttpResponse<T>(
-        int httpStatus,
         String message,
         T data
 
