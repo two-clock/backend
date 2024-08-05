@@ -39,4 +39,14 @@ public class BoardController {
 //        return new RestResponse(boardRespDto);
     }
 
+    @DeleteMapping("/{boardKey}")
+    public RestResponse deleteBoard(@PathVariable Long boardKey) {
+        // TODO : 로그인 유저인지 검증 필요
+        Long userId = 1L;
+
+        boardService.deleteBoard(boardKey, userId);
+
+        return RestResponse.OK();
+    }
+
 }
