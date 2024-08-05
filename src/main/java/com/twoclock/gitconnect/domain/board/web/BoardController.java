@@ -23,10 +23,9 @@ public class BoardController {
         Long userId = 1L;
 
         BoardRespDto boardRespDto = boardService.saveBoard(boardSaveReqDto, userId);
-        if(boardRespDto == null) throw new CustomException(FAIL_SAVE_BOARD);
 
-//        return RestResponse.OK();
-        return new RestResponse(boardRespDto);
+        return RestResponse.OK();
+//        return new RestResponse(boardRespDto);
     }
 
     @PutMapping
@@ -35,10 +34,9 @@ public class BoardController {
         Long userId = 1L;
 
         BoardRespDto boardRespDto = boardService.modifyBoard(boardUpdateReqDto, userId);
-        if (boardRespDto == null) throw new CustomException(FAIL_SAVE_BOARD);
 
-//        return RestResponse.OK();
-        return new RestResponse(boardRespDto);
+        return RestResponse.OK();
+//        return new RestResponse(boardRespDto);
     }
 
 }
