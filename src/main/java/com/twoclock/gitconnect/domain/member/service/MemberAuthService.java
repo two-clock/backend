@@ -100,12 +100,12 @@ public class MemberAuthService {
         String avatarUrl = memberInfoDto.avatarUrl();
         String name = memberInfoDto.name();
 
-        memberRepository.findByToken(token).ifPresentOrElse(
+        memberRepository.findByLogin(token).ifPresentOrElse(
                 (member) -> member.update(token, avatarUrl, name),
                 () -> {
                     Member member = Member.builder()
-                            .token(token)
-                            .profileImageUrl(avatarUrl)
+                            .login(token)
+                            .avatarUrl(avatarUrl)
                             .name(name)
                             .role(Role.ROLE_USER)
                             .build();
