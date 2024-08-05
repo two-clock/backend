@@ -21,20 +21,26 @@ public class Member extends BaseEntity {
     private String token;
 
     @Column(nullable = false)
-    private String nickname;
-
-    @Column(nullable = false)
     private String profileImageUrl;
+
+    @Column
+    private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
     @Builder
-    public Member(String token, String nickname, String profileImageUrl, Role role) {
+    public Member(String token, String profileImageUrl, String name, Role role) {
         this.token = token;
-        this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
+        this.name = name;
         this.role = role;
+    }
+
+    public void update(String token, String profileImageUrl, String name) {
+        this.token = token;
+        this.profileImageUrl = profileImageUrl;
+        this.name = name;
     }
 }
