@@ -18,23 +18,29 @@ public class Member extends BaseEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String token;
+    private String login;
 
     @Column(nullable = false)
-    private String nickname;
+    private String avatarUrl;
 
-    @Column(nullable = false)
-    private String profileImageUrl;
+    @Column
+    private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
     @Builder
-    public Member(String token, String nickname, String profileImageUrl, Role role) {
-        this.token = token;
-        this.nickname = nickname;
-        this.profileImageUrl = profileImageUrl;
+    public Member(String login, String avatarUrl, String name, Role role) {
+        this.login = login;
+        this.avatarUrl = avatarUrl;
+        this.name = name;
         this.role = role;
+    }
+
+    public void update(String login, String avatarUrl, String name) {
+        this.login = login;
+        this.avatarUrl = avatarUrl;
+        this.name = name;
     }
 }

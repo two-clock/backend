@@ -19,12 +19,14 @@ public class DummyDevlnit {
     CommandLineRunner init(MemberRepository memberRepository) {
         return (args) -> {
             log.info("Dummy Data Init");
+
             Member member = Member.builder()
-                    .nickname("테스트 유저")
-                    .token("testToken")
-                    .profileImageUrl("/uploads/profile/test.jpg")
+                    .login("loginId")
+                    .avatarUrl("/uploads/profile/test.jpg")
+                    .name("테스트 유저")
                     .role(Role.ROLE_USER)
                     .build();
+
             memberRepository.save(member);
         };
     }

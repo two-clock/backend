@@ -30,7 +30,7 @@ dependencies {
     // Validate
     implementation 'org.springframework.boot:spring-boot-starter-validation:'
 
-    // Spring-Web
+    // Spring Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 

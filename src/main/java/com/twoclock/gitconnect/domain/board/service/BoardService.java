@@ -25,14 +25,14 @@ public class BoardService {
     public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, Long userId) {
 
         Member member = memberRepository.findById(userId).orElseThrow(
-                ()-> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
         Category code = Category.of(boardSaveReqDto.category());
 
         Board board = Board.builder()
                 .title(boardSaveReqDto.title())
                 .content(boardSaveReqDto.content())
-                .nickname(member.getNickname())
+                .nickname(member.getName())
                 .category(code)
                 .member(member)
                 .build();
