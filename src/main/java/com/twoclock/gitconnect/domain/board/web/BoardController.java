@@ -40,7 +40,7 @@ public class BoardController {
     }
 
     @DeleteMapping("/{boardKey}")
-    public RestResponse deleteBoard(@PathVariable Long boardKey) {
+    public RestResponse deleteBoard(@PathVariable("boardKey") Long boardKey) {
         // TODO : 로그인 유저인지 검증 필요
         Long userId = 1L;
 
