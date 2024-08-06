@@ -82,9 +82,9 @@
 erDiagram
     Member {
         int id PK "ID"
-        string token UK "회원 토큰"
-        string nickname "닉네임"
-        string profile_image_url "프로필 이미지 URL"
+        string login UK "GitHub ID"
+        string avatar_url "GitHub 프로필 이미지 URI"
+        string name "GitHub 이름"
         string role "권한"
         date created_date_time "생성일자"
         date modified_date_time "수정일자"
