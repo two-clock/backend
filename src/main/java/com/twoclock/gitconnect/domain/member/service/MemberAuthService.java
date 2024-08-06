@@ -7,23 +7,19 @@ import com.twoclock.gitconnect.domain.member.dto.MemberInfoDto;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
-import com.twoclock.gitconnect.global.exception.CustomException;
-import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.twoclock.gitconnect.global.util.RestClientUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClient;
 
 @RequiredArgsConstructor
 @Service
 public class MemberAuthService {
 
     private final MemberRepository memberRepository;
-    private final RestClient restClient = RestClient.create();
 
     @Value("${github.client-id}")
     private String clientId;
@@ -51,15 +47,8 @@ public class MemberAuthService {
         body.add("redirect_uri", redirectUri);
         body.add("code", code);
 
-        String result = restClient.post()
-                .uri("https://github.com/login/oauth/access_token?scope=user")
-                .headers(httpHeaders -> httpHeaders.addAll(headers))
-                .body(body)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, ((request, response) -> {
-                    throw new CustomException(ErrorCode.GITHUB_SERVER_ERROR);
-                }))
-                .body(String.class);
+        String result =
+                RestClientUtil.post("https://github.com/login/oauth/access_token?scope=user", headers, body);
 
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(result);
@@ -75,14 +64,7 @@ public class MemberAuthService {
         headers.add("Authorization", "Bearer " + gitHubAccessToken);
         headers.add("Accept", "application/vnd.github+json");
 
-        String result = restClient.get()
-                .uri("https://api.github.com/user")
-                .headers(httpHeaders -> httpHeaders.addAll(headers))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, ((request, response) -> {
-                    throw new CustomException(ErrorCode.GITHUB_SERVER_ERROR);
-                }))
-                .body(String.class);
+        String result = RestClientUtil.get("https://api.github.com/user", headers);
 
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(result);
