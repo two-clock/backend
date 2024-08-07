@@ -54,4 +54,16 @@ public class BoardService {
 
         return new BoardRespDto(board);
     }
+
+    @Transactional
+    public void deleteBoard(Long boardKey, Long userId) {
+        Member member = memberRepository.findById(userId).orElseThrow(
+                ()-> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+        );
+        Board board = boardRepository.findById(boardKey).orElseThrow(
+                ()-> new CustomException(ErrorCode.NOT_FOUND_BOARD)
+        );
+        board.checkUserId(member.getId());
+        boardRepository.delete(board);
+    }
 }
