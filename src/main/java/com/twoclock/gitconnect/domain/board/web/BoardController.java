@@ -1,14 +1,15 @@
 package com.twoclock.gitconnect.domain.board.web;
 
+import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
+import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.service.BoardService;
-import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.*;
 import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
-import static com.twoclock.gitconnect.global.exception.constants.ErrorCode.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/boards")
@@ -37,6 +38,14 @@ public class BoardController {
 
         return RestResponse.OK();
 //        return new RestResponse(boardRespDto);
+    }
+
+    @GetMapping
+    public RestResponse getBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto) {
+
+        Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto);
+
+        return RestResponse.OK();
     }
 
 }
