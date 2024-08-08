@@ -13,7 +13,7 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private static final int TOKEN_EXPIRATION_TIME = 1000 * 60 * 60 * 3; // 3시간
+    private static final int ACCESS_TOKEN_EXPIRATION_TIME = 30 * 60 * 1000; // 30분
     private static final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
     public static final String BEARER_PREFIX = "Bearer ";
 
@@ -27,7 +27,7 @@ public class JwtService {
 
     private String generateToken(String subject) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + TOKEN_EXPIRATION_TIME);
+        Date expiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_TIME);
 
         return Jwts.builder()
                 .subject(subject)

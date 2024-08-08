@@ -45,9 +45,9 @@ public class MemberAuthService {
         String gitHubAccessToken = getGitHubAccessToken(code);
         MemberInfoDto memberInfoDto = getGitHubMemberInfo(gitHubAccessToken);
         Member member = registerOrUpdateMember(memberInfoDto);
+        String jwtAccessToken = forceLogin(member);
 
-        String accessToken = forceLogin(member);
-        httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + accessToken);
+        httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + jwtAccessToken);
         return new MemberInfoDto(member.getLogin(), member.getAvatarUrl(), member.getName());
     }
 
@@ -117,8 +117,8 @@ public class MemberAuthService {
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = jwtService.generateAccessToken(member);
+        String jwtAccessToken = jwtService.generateAccessToken(member);
         // TODO: Generate Refresh Token
-        return accessToken;
+        return jwtAccessToken;
     }
 }
