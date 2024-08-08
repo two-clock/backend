@@ -39,9 +39,4 @@ public class RestResponse extends ResponseEntity<HttpResponse<?>> {
                 .data(resultData)
                 .build(), headers, HttpStatus.OK);
     }
-
-
-
-
-
 }
