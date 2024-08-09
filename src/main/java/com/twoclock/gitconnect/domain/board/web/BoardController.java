@@ -45,7 +45,7 @@ public class BoardController {
 
         Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto);
 
-        return RestResponse.OK();
+        return new RestResponse(boardRespDto);
     }
 
 }

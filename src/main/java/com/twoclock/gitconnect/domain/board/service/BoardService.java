@@ -62,6 +62,12 @@ public class BoardService {
     @Transactional(readOnly = true)
     public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto) {
 
+        // TODO: 카테고리 타입 확인
+
+        // TODO: 신고 게시판 정책 추가
+
+        //
+
         // 페이지 요청 객체 생성
         PageRequest pageRequest = searchRequestDto.toPageRequest();
 
