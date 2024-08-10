@@ -8,6 +8,8 @@ import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.constants.GitHubUri;
+import com.twoclock.gitconnect.global.exception.CustomException;
+import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.global.jwt.JwtService;
 import com.twoclock.gitconnect.global.jwt.dto.JwtTokenInfoDto;
 import com.twoclock.gitconnect.global.security.UserDetailsImpl;
@@ -58,6 +60,22 @@ public class MemberAuthService {
 
         setAuthJwtTokens(httpServletResponse, member, accessToken, refreshToken);
         return new MemberInfoDto(member.getLogin(), member.getAvatarUrl(), member.getName());
+    }
+
+    public void refreshJwtToken(String refreshToken, HttpServletResponse httpServletResponse) {
+        String login = jwtService.getLogin(refreshToken);
+        Member member = memberRepository.findByLogin(login)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
+
+        String savedRefreshToken = redisTemplate.opsForValue().get(login);
+        if (!refreshToken.equals(savedRefreshToken)) {
+            throw new CustomException(ErrorCode.JWT_REFRESH_TOKEN_ERROR);
+        }
+
+        String newAccessToken = jwtService.generateAccessToken(member);
+        String newRefreshToken = jwtService.generateRefreshToken(member);
+
+        setAuthJwtTokens(httpServletResponse, member, newAccessToken, newRefreshToken);
     }
 
     private String getGitHubAccessToken(String code) {
