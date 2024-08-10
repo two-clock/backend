@@ -18,19 +18,21 @@ public class JwtService {
     public static final String BEARER_PREFIX = "Bearer ";
 
     public String generateAccessToken(Member member) {
-        return generateToken(member.getLogin());
+        return generateToken(member.getLogin(), member.getAvatarUrl(), member.getName());
     }
 
     public String getLogin(String accessToken) {
         return getSubject(accessToken);
     }
 
-    private String generateToken(String subject) {
+    private String generateToken(String subject, String avatarUrl, String name) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_TIME);
 
         return Jwts.builder()
                 .subject(subject)
+                .claim("avatarUrl", avatarUrl)
+                .claim("name", name)
                 .signWith(SECRET_KEY)
                 .issuedAt(now)
                 .expiration(expiration)
