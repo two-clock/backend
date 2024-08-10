@@ -9,11 +9,14 @@ import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.constants.GitHubUri;
 import com.twoclock.gitconnect.global.jwt.JwtService;
+import com.twoclock.gitconnect.global.jwt.dto.JwtTokenInfoDto;
 import com.twoclock.gitconnect.global.security.UserDetailsImpl;
 import com.twoclock.gitconnect.global.util.RestClientUtil;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,12 +26,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.util.concurrent.TimeUnit;
+
 @RequiredArgsConstructor
 @Service
 public class MemberAuthService {
 
     private static final String APPLICATION_FORM_URLENCODED_CHARSET_UTF8 = "application/x-www-form-urlencoded;charset=utf-8";
 
+    private final RedisTemplate<String, String> redisTemplate;
     private final MemberRepository memberRepository;
     private final JwtService jwtService;
 
@@ -45,9 +51,12 @@ public class MemberAuthService {
         String gitHubAccessToken = getGitHubAccessToken(code);
         MemberInfoDto memberInfoDto = getGitHubMemberInfo(gitHubAccessToken);
         Member member = registerOrUpdateMember(memberInfoDto);
-        String jwtAccessToken = forceLogin(member);
+        JwtTokenInfoDto jwtTokenInfoDto = forceLogin(member);
 
-        httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + jwtAccessToken);
+        String accessToken = jwtTokenInfoDto.accessToken();
+        String refreshToken = jwtTokenInfoDto.refreshToken();
+
+        setAuthJwtTokens(httpServletResponse, member, accessToken, refreshToken);
         return new MemberInfoDto(member.getLogin(), member.getAvatarUrl(), member.getName());
     }
 
@@ -112,13 +121,25 @@ public class MemberAuthService {
         });
     }
 
-    private String forceLogin(Member member) {
+    private JwtTokenInfoDto forceLogin(Member member) {
         UserDetails userDetails = new UserDetailsImpl(member);
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwtAccessToken = jwtService.generateAccessToken(member);
-        // TODO: Generate Refresh Token
-        return jwtAccessToken;
+        String jwtRefreshToken = jwtService.generateRefreshToken(member);
+        return new JwtTokenInfoDto(jwtAccessToken, jwtRefreshToken);
+    }
+
+    private void setAuthJwtTokens(HttpServletResponse httpServletResponse, Member member, String accessToken, String refreshToken) {
+        httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + accessToken);
+        redisTemplate.opsForValue()
+                .set(member.getLogin(), refreshToken, JwtService.REFRESH_TOKEN_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
+
+        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
+        httpServletResponse.addCookie(refreshCookie);
     }
 }
