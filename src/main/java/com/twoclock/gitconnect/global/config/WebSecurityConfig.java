@@ -30,6 +30,9 @@ public class WebSecurityConfig {
     private static final String[] GET_PERMIT_STRINGS = {
             "/api/v1/members/auth/github/callback"
     };
+    private static final String[] POST_PERMIT_STRINGS = {
+            "/api/v1/members/auth/refresh"
+    };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
@@ -65,6 +68,7 @@ public class WebSecurityConfig {
 
         http.authorizeHttpRequests((requests) -> requests
                         .requestMatchers(HttpMethod.GET, GET_PERMIT_STRINGS).permitAll()
+                        .requestMatchers(HttpMethod.POST, POST_PERMIT_STRINGS).permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )

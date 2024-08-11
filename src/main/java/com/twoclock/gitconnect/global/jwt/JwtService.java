@@ -14,18 +14,16 @@ import java.util.Date;
 public class JwtService {
 
     private static final int ACCESS_TOKEN_EXPIRATION_TIME = 30 * 60 * 1000; // 30분
+    public static final int REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000; // 일주일
+
     private static final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
     public static final String BEARER_PREFIX = "Bearer ";
 
     public String generateAccessToken(Member member) {
-        return generateToken(member.getLogin(), member.getAvatarUrl(), member.getName());
-    }
+        String subject = member.getLogin();
+        String avatarUrl = member.getAvatarUrl();
+        String name = member.getName();
 
-    public String getLogin(String accessToken) {
-        return getSubject(accessToken);
-    }
-
-    private String generateToken(String subject, String avatarUrl, String name) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_TIME);
 
@@ -37,6 +35,24 @@ public class JwtService {
                 .issuedAt(now)
                 .expiration(expiration)
                 .compact();
+    }
+
+    public String generateRefreshToken(Member member) {
+        String subject = member.getLogin();
+
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION_TIME);
+
+        return Jwts.builder()
+                .subject(subject)
+                .signWith(SECRET_KEY)
+                .issuedAt(now)
+                .expiration(expiration)
+                .compact();
+    }
+
+    public String getLogin(String jwtToken) {
+        return getSubject(jwtToken);
     }
 
     private String getSubject(String token) {
