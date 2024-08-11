@@ -8,10 +8,17 @@ import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.constants.GitHubUri;
+import com.twoclock.gitconnect.global.jwt.JwtService;
+import com.twoclock.gitconnect.global.security.UserDetailsImpl;
 import com.twoclock.gitconnect.global.util.RestClientUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -23,6 +30,7 @@ public class MemberAuthService {
     private static final String APPLICATION_FORM_URLENCODED_CHARSET_UTF8 = "application/x-www-form-urlencoded;charset=utf-8";
 
     private final MemberRepository memberRepository;
+    private final JwtService jwtService;
 
     @Value("${github.client-id}")
     private String clientId;
@@ -33,10 +41,14 @@ public class MemberAuthService {
     @Value("${github.redirect-uri}")
     private String redirectUri;
 
-    public void githubLogin(String code) {
+    public MemberInfoDto githubLogin(String code, HttpServletResponse httpServletResponse) {
         String gitHubAccessToken = getGitHubAccessToken(code);
         MemberInfoDto memberInfoDto = getGitHubMemberInfo(gitHubAccessToken);
-        registerOrUpdateMember(memberInfoDto);
+        Member member = registerOrUpdateMember(memberInfoDto);
+        String jwtAccessToken = forceLogin(member);
+
+        httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + jwtAccessToken);
+        return new MemberInfoDto(member.getLogin(), member.getAvatarUrl(), member.getName());
     }
 
     private String getGitHubAccessToken(String code) {
@@ -79,23 +91,34 @@ public class MemberAuthService {
         }
     }
 
-    private void registerOrUpdateMember(MemberInfoDto memberInfoDto) {
+    private Member registerOrUpdateMember(MemberInfoDto memberInfoDto) {
         String token = memberInfoDto.login();
         String avatarUrl = memberInfoDto.avatarUrl();
         String name = memberInfoDto.name();
 
-        memberRepository.findByLogin(token).ifPresentOrElse(
-                (member) -> member.update(token, avatarUrl, name),
-                () -> {
-                    Member member = Member.builder()
-                            .login(token)
-                            .avatarUrl(avatarUrl)
-                            .name(name)
-                            .role(Role.ROLE_USER)
-                            .build();
+        return memberRepository.findByLogin(token).map(member -> {
+            member.update(token, avatarUrl, name);
+            return member;
+        }).orElseGet(() -> {
+            Member member = Member.builder()
+                    .login(token)
+                    .avatarUrl(avatarUrl)
+                    .name(name)
+                    .role(Role.ROLE_USER)
+                    .build();
 
-                    memberRepository.save(member);
-                }
-        );
+            memberRepository.save(member);
+            return member;
+        });
+    }
+
+    private String forceLogin(Member member) {
+        UserDetails userDetails = new UserDetailsImpl(member);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwtAccessToken = jwtService.generateAccessToken(member);
+        // TODO: Generate Refresh Token
+        return jwtAccessToken;
     }
 }

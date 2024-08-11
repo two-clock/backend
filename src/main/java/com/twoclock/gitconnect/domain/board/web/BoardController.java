@@ -40,12 +40,23 @@ public class BoardController {
 //        return new RestResponse(boardRespDto);
     }
 
+
     @GetMapping
     public RestResponse getBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto) {
 
         Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto);
 
         return new RestResponse(boardRespDto);
+
+    @DeleteMapping("/{boardKey}")
+    public RestResponse deleteBoard(@PathVariable("boardKey") Long boardKey) {
+        // TODO : 로그인 유저인지 검증 필요
+        Long userId = 1L;
+
+        boardService.deleteBoard(boardKey, userId);
+
+        return RestResponse.OK();
+
     }
 
 }

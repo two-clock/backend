@@ -1,8 +1,10 @@
 package com.twoclock.gitconnect.domain.member.web;
 
+import com.twoclock.gitconnect.domain.member.dto.MemberInfoDto;
 import com.twoclock.gitconnect.domain.member.service.MemberAuthService;
+import com.twoclock.gitconnect.global.model.RestResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,9 +18,8 @@ public class MemberAuthController {
     private final MemberAuthService memberAuthService;
 
     @GetMapping("/github/callback")
-    public ResponseEntity<String> githubLogin(@RequestParam String code) {
-        memberAuthService.githubLogin(code);
-        // TODO: 로그인 시 AccessToken 반환
-        return null;
+    public RestResponse githubLogin(@RequestParam String code, HttpServletResponse httpServletResponse) {
+        MemberInfoDto responseDto = memberAuthService.githubLogin(code, httpServletResponse);
+        return new RestResponse(responseDto);
     }
 }
