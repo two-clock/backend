@@ -2,6 +2,7 @@ package com.twoclock.gitconnect.domain.board.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 import com.twoclock.gitconnect.domain.board.entity.Board;
+import com.twoclock.gitconnect.domain.member.dto.MemberInfoDto;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import lombok.Builder;
 
@@ -12,11 +13,11 @@ public record SearchResponseDto(
         String content,
         String nickname,
         String category,
-        Member member
+        MemberInfoDto member
 ) {
 
     @QueryProjection
-    public SearchResponseDto(Long id, String title, String content, String nickname, String category, Member member) {
+    public SearchResponseDto(Long id, String title, String content, String nickname, String category, MemberInfoDto member) {
         this.id = id;
         this.title = title;
         this.content = content;
