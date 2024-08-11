@@ -38,7 +38,7 @@ public class BoardRepositoryImpl implements CustomBoardRepository{
                         board.member
                 ))
                 .from(board)
-                .join(board.member, member).fetchJoin()
+                .join(board.member, member)
                 .where(searchQueryBuilder(searchRequestDto))
                 .orderBy(board.createdDateTime.desc())
                 .offset(pageable.getOffset())
@@ -54,7 +54,7 @@ public class BoardRepositoryImpl implements CustomBoardRepository{
         BooleanBuilder builder = new BooleanBuilder();
 
         // 게시판 카테고리 설정
-        builder.and(board.category.eq(Category.valueOf(searchRequestDto.category())));
+        builder.and(board.category.eq(Category.of(searchRequestDto.category())));
 
         // 검색어가 존재하는 경우
         if(searchRequestDto.searchWord() != null) {
