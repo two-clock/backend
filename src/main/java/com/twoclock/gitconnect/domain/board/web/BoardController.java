@@ -48,6 +48,8 @@ public class BoardController {
 
         return new RestResponse(boardRespDto);
 
+    }
+
     @DeleteMapping("/{boardKey}")
     public RestResponse deleteBoard(@PathVariable("boardKey") Long boardKey) {
         // TODO : 로그인 유저인지 검증 필요

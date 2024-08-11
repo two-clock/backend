@@ -76,6 +76,8 @@ public class BoardService {
 
         return boardList;
 
+    }
+
     @Transactional
     public void deleteBoard(Long boardKey, Long userId) {
         Member member = memberRepository.findById(userId).orElseThrow(
