@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.PageRequest;
 
 public record SearchRequestDto(
-        String searchWord,
-        String searchType, // 검색 조건(제목, 내용, 작성자)
+        String word,
+        String type, // 검색 조건(제목, 내용, 작성자)
         @NotBlank(message = "카테고리는 필수값 입니다.")
         String category,
         Long page,

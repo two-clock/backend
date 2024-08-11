@@ -57,22 +57,22 @@ public class BoardRepositoryImpl implements CustomBoardRepository{
         builder.and(board.category.eq(Category.of(searchRequestDto.category())));
 
         // 검색어가 존재하는 경우
-        if(searchRequestDto.searchWord() != null) {
-            switch (searchRequestDto.searchType()) {
+        if(searchRequestDto.word() != null) {
+            switch (searchRequestDto.type()) {
                 case "title":
-                    builder.and(board.title.contains(searchRequestDto.searchWord()));
+                    builder.and(board.title.contains(searchRequestDto.word()));
                     break;
                 case "content":
-                    builder.and(board.content.contains(searchRequestDto.searchWord()));
+                    builder.and(board.content.contains(searchRequestDto.word()));
                     break;
                 case "name":
-                    builder.and(board.nickname.contains(searchRequestDto.searchWord()));
+                    builder.and(board.nickname.contains(searchRequestDto.word()));
                     break;
                 case "all":
                     builder.and(
-                            board.title.contains(searchRequestDto.searchWord())
-                                    .or(board.content.contains(searchRequestDto.searchWord()))
-                                    .or(board.nickname.contains(searchRequestDto.searchWord()))
+                            board.title.contains(searchRequestDto.word())
+                                    .or(board.content.contains(searchRequestDto.word()))
+                                    .or(board.nickname.contains(searchRequestDto.word()))
                     );
                     break;
             }
