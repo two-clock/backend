@@ -1,4 +1,4 @@
-package com.twoclock.gitconnect.global.jwt;
+package com.twoclock.gitconnect.global.jwt.service;
 
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import io.jsonwebtoken.JwtException;

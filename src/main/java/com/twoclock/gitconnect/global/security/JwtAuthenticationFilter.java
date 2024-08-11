@@ -1,6 +1,6 @@
 package com.twoclock.gitconnect.global.security;
 
-import com.twoclock.gitconnect.global.jwt.JwtService;
+import com.twoclock.gitconnect.global.jwt.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
