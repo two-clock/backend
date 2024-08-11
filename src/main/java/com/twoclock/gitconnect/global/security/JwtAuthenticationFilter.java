@@ -1,10 +1,13 @@
 package com.twoclock.gitconnect.global.security;
 
+import com.twoclock.gitconnect.global.jwt.service.JwtRedisService;
 import com.twoclock.gitconnect.global.jwt.service.JwtService;
+import com.twoclock.gitconnect.global.util.CustomResponseUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -17,16 +20,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.twoclock.gitconnect.global.exception.constants.ErrorCode.JWT_BLACKLIST;
+
+@RequiredArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final JwtService jwtService;
-
-    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsServiceImpl userDetailsServiceImpl) {
-        this.jwtService = jwtService;
-        this.userDetailsServiceImpl = userDetailsServiceImpl;
-    }
+    private final JwtRedisService jwtRedisService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -39,6 +41,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 && securityContext.getAuthentication() == null
         ) {
             String jwtAccessToken = authorization.substring(JwtService.BEARER_PREFIX.length());
+            if (jwtRedisService.isBlacklisted(jwtAccessToken)) {
+                CustomResponseUtil.fail(
+                        response, JWT_BLACKLIST.getHttpStatus(), JWT_BLACKLIST.getCode(), JWT_BLACKLIST.getMessage()
+                );
+                return;
+            }
+
             String login = jwtService.getLogin(jwtAccessToken);
             UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(login);
 
