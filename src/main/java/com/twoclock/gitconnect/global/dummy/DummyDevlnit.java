@@ -45,7 +45,7 @@ public class DummyDevlnit {
     }
 
     private void createDummyBoards(List<Board> boards, String titlePrefix, Category category,
-                                   int count, Member member){
+                                   int count, Member member) {
         for (int i = 0; i < count; i++) {
             Board board = Board.builder()
                     .title(titlePrefix + i)

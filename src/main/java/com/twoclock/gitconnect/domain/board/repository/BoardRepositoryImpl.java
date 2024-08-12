@@ -18,7 +18,7 @@ import java.util.List;
 import static com.twoclock.gitconnect.domain.board.entity.QBoard.board;
 import static com.twoclock.gitconnect.domain.member.entity.QMember.member;
 
-public class BoardRepositoryImpl implements CustomBoardRepository{
+public class BoardRepositoryImpl implements CustomBoardRepository {
 
     private final JPAQueryFactory queryFactory;
 
