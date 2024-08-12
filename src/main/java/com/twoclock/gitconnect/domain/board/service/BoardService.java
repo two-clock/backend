@@ -1,7 +1,10 @@
 package com.twoclock.gitconnect.domain.board.service;
 
-import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.*;
-import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
+import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
+import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
+import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
@@ -10,6 +13,8 @@ import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +60,25 @@ public class BoardService {
         return new BoardRespDto(board);
     }
 
+
+    @Transactional(readOnly = true)
+    public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto) {
+
+        // TODO: 카테고리 타입 확인
+
+        // TODO: 신고 게시판 정책 추가
+
+        //
+
+        // 페이지 요청 객체 생성
+        PageRequest pageRequest = searchRequestDto.toPageRequest();
+
+        Page<SearchResponseDto> boardList = boardRepository.searchBoardList(searchRequestDto, pageRequest);
+
+        return boardList;
+
+    }
+
     @Transactional
     public void deleteBoard(Long boardKey, Long userId) {
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -65,5 +89,6 @@ public class BoardService {
         );
         board.checkUserId(member.getId());
         boardRepository.delete(board);
+
     }
 }
