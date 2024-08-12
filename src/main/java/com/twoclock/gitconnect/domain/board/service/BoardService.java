@@ -1,7 +1,8 @@
 package com.twoclock.gitconnect.domain.board.service;
 
-import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.*;
-import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
+import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.entity.Board;

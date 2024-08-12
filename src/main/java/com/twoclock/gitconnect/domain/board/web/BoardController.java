@@ -1,5 +1,8 @@
 package com.twoclock.gitconnect.domain.board.web;
 
+import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.service.BoardService;
@@ -8,8 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.*;
-import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/boards")
