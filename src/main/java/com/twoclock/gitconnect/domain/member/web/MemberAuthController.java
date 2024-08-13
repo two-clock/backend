@@ -3,6 +3,7 @@ package com.twoclock.gitconnect.domain.member.web;
 import com.twoclock.gitconnect.domain.member.dto.MemberInfoDto;
 import com.twoclock.gitconnect.domain.member.service.MemberAuthService;
 import com.twoclock.gitconnect.global.model.RestResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,15 @@ public class MemberAuthController {
             HttpServletResponse httpServletResponse
     ) {
         memberAuthService.refreshJwtToken(refreshToken, httpServletResponse);
+        return RestResponse.OK();
+    }
+
+    @PostMapping("/logout")
+    public RestResponse logout(
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
+    ) {
+        memberAuthService.logout(httpServletRequest, httpServletResponse);
         return RestResponse.OK();
     }
 }

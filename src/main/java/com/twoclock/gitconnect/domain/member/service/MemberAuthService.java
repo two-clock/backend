@@ -10,15 +10,16 @@ import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.constants.GitHubUri;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
-import com.twoclock.gitconnect.global.jwt.JwtService;
 import com.twoclock.gitconnect.global.jwt.dto.JwtTokenInfoDto;
+import com.twoclock.gitconnect.global.jwt.service.JwtRedisService;
+import com.twoclock.gitconnect.global.jwt.service.JwtService;
 import com.twoclock.gitconnect.global.security.UserDetailsImpl;
 import com.twoclock.gitconnect.global.util.RestClientUtil;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Date;
 
 @RequiredArgsConstructor
 @Service
@@ -36,9 +37,9 @@ public class MemberAuthService {
 
     private static final String APPLICATION_FORM_URLENCODED_CHARSET_UTF8 = "application/x-www-form-urlencoded;charset=utf-8";
 
-    private final RedisTemplate<String, String> redisTemplate;
     private final MemberRepository memberRepository;
     private final JwtService jwtService;
+    private final JwtRedisService jwtRedisService;
 
     @Value("${github.client-id}")
     private String clientId;
@@ -67,7 +68,7 @@ public class MemberAuthService {
         Member member = memberRepository.findByLogin(login)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
 
-        String savedRefreshToken = redisTemplate.opsForValue().get(login);
+        String savedRefreshToken = jwtRedisService.getRefreshToken(login);
         if (!refreshToken.equals(savedRefreshToken)) {
             throw new CustomException(ErrorCode.JWT_REFRESH_TOKEN_ERROR);
         }
@@ -76,6 +77,24 @@ public class MemberAuthService {
         String newRefreshToken = jwtService.generateRefreshToken(member);
 
         setAuthJwtTokens(httpServletResponse, member, newAccessToken, newRefreshToken);
+    }
+
+    public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        String authorization = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
+        String jwtAccessToken = authorization.substring(JwtService.BEARER_PREFIX.length());
+        String login = jwtService.getLogin(jwtAccessToken);
+
+        long jwtAccessTokenExpirationTime = jwtService.getTokenExpirationTime(jwtAccessToken);
+        long now = new Date().getTime();
+
+        jwtRedisService.deleteRefreshToken(login);
+        jwtRedisService.addToBlacklist(jwtAccessToken, jwtAccessTokenExpirationTime - now);
+
+        Cookie deleteRefreshCookie = new Cookie("refreshToken", null);
+        deleteRefreshCookie.setHttpOnly(true);
+        deleteRefreshCookie.setPath("/");
+        deleteRefreshCookie.setMaxAge(0);
+        httpServletResponse.addCookie(deleteRefreshCookie);
     }
 
     private String getGitHubAccessToken(String code) {
@@ -151,8 +170,7 @@ public class MemberAuthService {
 
     private void setAuthJwtTokens(HttpServletResponse httpServletResponse, Member member, String accessToken, String refreshToken) {
         httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + accessToken);
-        redisTemplate.opsForValue()
-                .set(member.getLogin(), refreshToken, JwtService.REFRESH_TOKEN_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
+        jwtRedisService.saveRefreshToken(member.getLogin(), refreshToken, JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
 
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);

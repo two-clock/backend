@@ -1,13 +1,11 @@
 package com.twoclock.gitconnect.global.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twoclock.gitconnect.global.exception.ErrorResponseDto;
+import com.twoclock.gitconnect.global.util.CustomResponseUtil;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,16 +22,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } catch (JwtException e) {
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(JWT_ERROR.getHttpStatus().value());
-            response.setCharacterEncoding("UTF-8");
-
-            ErrorResponseDto errorResponseDto =
-                    new ErrorResponseDto(JWT_ERROR.getCode(), JWT_ERROR.getMessage(), null);
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            String responseJson = objectMapper.writeValueAsString(errorResponseDto);
-            response.getWriter().write(responseJson);
+            CustomResponseUtil.fail(response, JWT_ERROR.getHttpStatus(), JWT_ERROR.getCode(), JWT_ERROR.getMessage());
         }
     }
 }
