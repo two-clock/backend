@@ -19,6 +19,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +32,7 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.Date;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MemberAuthService {
@@ -54,8 +56,10 @@ public class MemberAuthService {
         String gitHubAccessToken = getGitHubAccessToken(code);
         MemberInfoDto memberInfoDto = getGitHubMemberInfo(gitHubAccessToken);
         Member member = registerOrUpdateMember(memberInfoDto);
-        JwtTokenInfoDto jwtTokenInfoDto = forceLogin(member);
 
+        deleteRefreshTokenIfExist(member.getLogin());
+
+        JwtTokenInfoDto jwtTokenInfoDto = forceLogin(member);
         String accessToken = jwtTokenInfoDto.accessToken();
         String refreshToken = jwtTokenInfoDto.refreshToken();
 
@@ -177,5 +181,11 @@ public class MemberAuthService {
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
         httpServletResponse.addCookie(refreshCookie);
+    }
+
+    private void deleteRefreshTokenIfExist(String login) {
+        if (jwtRedisService.getRefreshToken(login) != null) {
+            jwtRedisService.deleteRefreshToken(login);
+        }
     }
 }
