@@ -54,8 +54,10 @@ public class MemberAuthService {
         String gitHubAccessToken = getGitHubAccessToken(code);
         MemberInfoDto memberInfoDto = getGitHubMemberInfo(gitHubAccessToken);
         Member member = registerOrUpdateMember(memberInfoDto);
-        JwtTokenInfoDto jwtTokenInfoDto = forceLogin(member);
 
+        deleteRefreshTokenIfExist(member.getLogin());
+
+        JwtTokenInfoDto jwtTokenInfoDto = forceLogin(member);
         String accessToken = jwtTokenInfoDto.accessToken();
         String refreshToken = jwtTokenInfoDto.refreshToken();
 
@@ -177,5 +179,11 @@ public class MemberAuthService {
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
         httpServletResponse.addCookie(refreshCookie);
+    }
+
+    private void deleteRefreshTokenIfExist(String login) {
+        if (jwtRedisService.getRefreshToken(login) != null) {
+            jwtRedisService.deleteRefreshToken(login);
+        }
     }
 }
