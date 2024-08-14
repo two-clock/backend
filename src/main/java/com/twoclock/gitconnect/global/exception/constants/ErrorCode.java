@@ -10,6 +10,9 @@ public enum ErrorCode {
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S-001", "서버 에러가 발생했습니다."),
 
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "U-001", "잘못된 요청입니다."),
+    NOT_ACCEPTABLE(HttpStatus.NOT_ACCEPTABLE, "U-002", "요청을 수락할 수 없습니다."),
+
     JWT_ERROR(HttpStatus.UNAUTHORIZED, "JWT-001", "JWT 토큰 에러가 발생했습니다."),
     JWT_REFRESH_TOKEN_ERROR(HttpStatus.FORBIDDEN, "JWT-002", "JWT 리프레쉬 토큰 에러가 발생했습니다."),
     JWT_BLACKLIST(HttpStatus.FORBIDDEN, "JWT-003", "블랙 리스트에 저장된 JWT 토큰입니다."),

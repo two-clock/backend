@@ -7,8 +7,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,4 +47,68 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponseDto> MethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        ErrorResponseDto responseDto =
+                new ErrorResponseDto(
+                        ErrorCode.BAD_REQUEST.getCode(),
+                        ErrorCode.BAD_REQUEST.getMessage(),
+                        null
+                );
+
+        log.error(e.getMessage(), e);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDto> AccessDeniedException(AccessDeniedException e) {
+        ErrorResponseDto responseDto =
+                new ErrorResponseDto(
+                        ErrorCode.BAD_REQUEST.getCode(),
+                        ErrorCode.BAD_REQUEST.getMessage(),
+                        null
+                );
+
+        log.error(e.getMessage(), e);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<ErrorResponseDto> MissingRequestCookieException(MissingRequestCookieException e) {
+        ErrorResponseDto responseDto =
+                new ErrorResponseDto(
+                        ErrorCode.NOT_ACCEPTABLE.getCode(),
+                        ErrorCode.NOT_ACCEPTABLE.getMessage(),
+                        null
+                );
+
+        log.error(e.getMessage(), e);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDto> MethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        BindingResult bindingResult = e.getBindingResult();
+        Map<String, String> errorMap = new HashMap<>();
+        for (FieldError error : bindingResult.getFieldErrors()) {
+            errorMap.put(error.getField(), error.getDefaultMessage());
+        }
+
+        ErrorResponseDto responseDto =
+                new ErrorResponseDto(
+                        ErrorCode.BAD_REQUEST.getCode(),
+                        "유효성 검사 실패",
+                        errorMap
+                );
+
+        log.error(e.getMessage(), e);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
+    }
+
+
 }
