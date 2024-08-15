@@ -7,6 +7,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -17,7 +18,7 @@ import java.util.Map;
 @Service
 public class JwtService {
 
-    private static final int ACCESS_TOKEN_EXPIRATION_TIME = 10 * 1000; // 30분
+    private static final int ACCESS_TOKEN_EXPIRATION_TIME = 30 * 60 * 1000; // 30분
     public static final int REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000; // 일주일
 
     private static final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
@@ -55,6 +56,13 @@ public class JwtService {
                 .issuedAt(now)
                 .expiration(expiration)
                 .compact();
+    }
+
+    public boolean validateToken(String jwtToken) {
+        if (!StringUtils.hasText(jwtToken)) {
+            return false;
+        }
+        return getClaims(jwtToken).getExpiration().after(new Date());
     }
 
     public String getGitHubId(String jwtToken) {

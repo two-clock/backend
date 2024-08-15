@@ -28,6 +28,7 @@ import java.util.List;
 public class WebSecurityConfig {
 
     private static final String[] GET_PERMIT_STRINGS = {
+            "api/v1/hello",
             "/api/v1/members/auth/github/callback"
     };
     private static final String[] POST_PERMIT_STRINGS = {

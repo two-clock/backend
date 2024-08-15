@@ -175,7 +175,7 @@ public class MemberAuthService {
 
     private void setAuthJwtTokens(HttpServletResponse httpServletResponse, Member member, String accessToken, String refreshToken) {
         httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + accessToken);
-        jwtRedisService.saveRefreshToken(member.getLogin(), refreshToken, JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
+        jwtRedisService.saveRefreshToken(member.getGitHubId(), refreshToken, JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
 
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
