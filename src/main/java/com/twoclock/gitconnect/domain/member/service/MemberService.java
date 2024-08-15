@@ -38,19 +38,22 @@ public class MemberService {
         Member member = memberRepository.findByGitHubId(gitHubId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
 
-        if (memberRepository.existsByLogin(requestDto.login())) {
+        String login = requestDto.login().isEmpty() ? member.getLogin() : requestDto.login();
+        if (!login.equals(member.getLogin()) && memberRepository.existsByLogin(login)) {
             throw new CustomException(ErrorCode.ALREADY_EXIST_MEMBER);
         }
 
-        String avatarImageUrl = member.getAvatarUrl();
-        if (!multipartFile.isEmpty()) {
+        String name = requestDto.name().isEmpty() ? member.getName() : requestDto.name();
+
+        String avatarUrl = member.getAvatarUrl();
+        if (multipartFile != null) {
             String avatarImageKey = extractKeyFromUrl(member.getAvatarUrl());
             s3Service.deleteFile(avatarImageKey);
-            avatarImageUrl = handleAvatarImage(multipartFile);
+            avatarUrl = handleAvatarImage(multipartFile);
         }
 
-        member.update(requestDto.login(), avatarImageUrl, requestDto.name());
-        return new MemberModifyRespDto(member.getLogin(), avatarImageUrl, member.getName());
+        member.update(login, avatarUrl, name);
+        return new MemberModifyRespDto(member.getLogin(), member.getAvatarUrl(), member.getName());
     }
 
     private String handleAvatarImage(MultipartFile multipartFile) {
