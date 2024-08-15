@@ -20,6 +20,9 @@ public class Member extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String login;
 
+    @Column(nullable = false, unique = true)
+    private String gitHubId;
+
     @Column(nullable = false)
     private String avatarUrl;
 
@@ -31,8 +34,9 @@ public class Member extends BaseEntity {
     private Role role;
 
     @Builder
-    public Member(String login, String avatarUrl, String name, Role role) {
+    public Member(String login, String gitHubId, String avatarUrl, String name, Role role) {
         this.login = login;
+        this.gitHubId = gitHubId;
         this.avatarUrl = avatarUrl;
         this.name = name;
         this.role = role;

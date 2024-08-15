@@ -48,8 +48,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            String login = jwtService.getLogin(jwtAccessToken);
-            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(login);
+            String gitHubId = jwtService.getGitHubId(jwtAccessToken);
+            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(gitHubId);
 
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

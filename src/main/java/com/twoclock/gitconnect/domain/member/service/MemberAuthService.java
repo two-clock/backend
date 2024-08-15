@@ -55,22 +55,22 @@ public class MemberAuthService {
         MemberInfoDto memberInfoDto = getGitHubMemberInfo(gitHubAccessToken);
         Member member = registerOrUpdateMember(memberInfoDto);
 
-        deleteRefreshTokenIfExist(member.getLogin());
+        deleteRefreshTokenIfExist(member.getGitHubId());
 
         JwtTokenInfoDto jwtTokenInfoDto = forceLogin(member);
         String accessToken = jwtTokenInfoDto.accessToken();
         String refreshToken = jwtTokenInfoDto.refreshToken();
 
         setAuthJwtTokens(httpServletResponse, member, accessToken, refreshToken);
-        return new MemberInfoDto(member.getLogin(), member.getAvatarUrl(), member.getName());
+        return new MemberInfoDto(member.getLogin(), member.getGitHubId(), member.getAvatarUrl(), member.getName());
     }
 
     public void refreshJwtToken(String refreshToken, HttpServletResponse httpServletResponse) {
-        String login = jwtService.getLogin(refreshToken);
-        Member member = memberRepository.findByLogin(login)
+        String gitHubId = jwtService.getGitHubId(refreshToken);
+        Member member = memberRepository.findByGitHubId(gitHubId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
 
-        String savedRefreshToken = jwtRedisService.getRefreshToken(login);
+        String savedRefreshToken = jwtRedisService.getRefreshToken(gitHubId);
         if (!refreshToken.equals(savedRefreshToken)) {
             throw new CustomException(ErrorCode.JWT_REFRESH_TOKEN_ERROR);
         }
@@ -84,12 +84,12 @@ public class MemberAuthService {
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         String authorization = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         String jwtAccessToken = authorization.substring(JwtService.BEARER_PREFIX.length());
-        String login = jwtService.getLogin(jwtAccessToken);
+        String gitHubId = jwtService.getGitHubId(jwtAccessToken);
 
         long jwtAccessTokenExpirationTime = jwtService.getTokenExpirationTime(jwtAccessToken);
         long now = new Date().getTime();
 
-        jwtRedisService.deleteRefreshToken(login);
+        jwtRedisService.deleteRefreshToken(gitHubId);
         jwtRedisService.addToBlacklist(jwtAccessToken, jwtAccessTokenExpirationTime - now);
 
         Cookie deleteRefreshCookie = new Cookie("refreshToken", null);
@@ -130,10 +130,12 @@ public class MemberAuthService {
 
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(result);
+
             String login = jsonNode.get("login").asText();
+            String githubId = jsonNode.get("id").asText();
             String avatarUrl = jsonNode.get("avatar_url").asText();
             String name = jsonNode.get("name").asText();
-            return new MemberInfoDto(login, avatarUrl, name);
+            return new MemberInfoDto(login, githubId, avatarUrl, name);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -141,6 +143,7 @@ public class MemberAuthService {
 
     private Member registerOrUpdateMember(MemberInfoDto memberInfoDto) {
         String token = memberInfoDto.login();
+        String gitHubId = memberInfoDto.gitHubId();
         String avatarUrl = memberInfoDto.avatarUrl();
         String name = memberInfoDto.name();
 
@@ -150,6 +153,7 @@ public class MemberAuthService {
         }).orElseGet(() -> {
             Member member = Member.builder()
                     .login(token)
+                    .gitHubId(gitHubId)
                     .avatarUrl(avatarUrl)
                     .name(name)
                     .role(Role.ROLE_USER)
@@ -172,7 +176,7 @@ public class MemberAuthService {
 
     private void setAuthJwtTokens(HttpServletResponse httpServletResponse, Member member, String accessToken, String refreshToken) {
         httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + accessToken);
-        jwtRedisService.saveRefreshToken(member.getLogin(), refreshToken, JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
+        jwtRedisService.saveRefreshToken(member.getGitHubId(), refreshToken, JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
 
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
@@ -181,9 +185,9 @@ public class MemberAuthService {
         httpServletResponse.addCookie(refreshCookie);
     }
 
-    private void deleteRefreshTokenIfExist(String login) {
-        if (jwtRedisService.getRefreshToken(login) != null) {
-            jwtRedisService.deleteRefreshToken(login);
+    private void deleteRefreshTokenIfExist(String gitHubId) {
+        if (jwtRedisService.getRefreshToken(gitHubId) != null) {
+            jwtRedisService.deleteRefreshToken(gitHubId);
         }
     }
 }

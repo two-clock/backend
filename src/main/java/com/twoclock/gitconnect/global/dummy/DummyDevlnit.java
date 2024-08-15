@@ -29,6 +29,7 @@ public class DummyDevlnit {
             // 테스트 계정 생성
             Member member = Member.builder()
                     .login("loginId")
+                    .gitHubId("1234")
                     .avatarUrl("/uploads/profile/test.jpg")
                     .name("테스트 유저")
                     .role(Role.ROLE_USER)
