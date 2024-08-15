@@ -25,6 +25,12 @@ public class GithubAPISerivce {
         return getFollowersFromJson(result);
     }
 
+    public List<FollowRespDto> getFollowing(String accessToken) throws JsonProcessingException {
+        HttpHeaders headers = getHeaders(accessToken);
+        String result = RestClientUtil.get(GitHubUri.FOLLOWING_LIST.getUri(), headers);
+        return getFollowersFromJson(result);
+    }
+
     private HttpHeaders getHeaders(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "application/vnd.github+json");

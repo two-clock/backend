@@ -29,4 +29,11 @@ public class GithubAPIController {
         List<FollowRespDto> result = githubAPISerivce.getFollowers(accessToken);
         return new RestResponse(result);
     }
+
+    @GetMapping("/following")
+    public RestResponse getFollowing() throws JsonProcessingException {
+        // TODO : 토큰에서 Github Access Token을 추출 해야함.
+        List<FollowRespDto> result = githubAPISerivce.getFollowing(accessToken);
+        return new RestResponse(result);
+    }
 }
