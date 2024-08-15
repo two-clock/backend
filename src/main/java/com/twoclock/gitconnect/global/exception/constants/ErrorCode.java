@@ -19,6 +19,9 @@ public enum ErrorCode {
 
     NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "M-001", "찾을 수 없는 회원 계정입니다."),
     DIFF_USER_BOARD(HttpStatus.FORBIDDEN, "M-002", "게시글을 등록한 사용자와 일치하지 않습니다."),
+    ALREADY_EXIST_MEMBER(HttpStatus.BAD_REQUEST, "M-003", "이미 존재하는 회원 계정입니다."),
+    OVER_AVATAR_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "M-004", "아바타 이미지 사이즈는 최대 5MB까지 가능합니다."),
+    INVALID_AVATAR_IMAGE_TYPE(HttpStatus.BAD_REQUEST, "M-005", "업로드 할 수 없는 아바타 이미지 타입입니다."),
 
     NOT_FOUND_CATEGORY(HttpStatus.NOT_FOUND, "C-001", "찾을 수 없는 카테고리입니다."),
 
