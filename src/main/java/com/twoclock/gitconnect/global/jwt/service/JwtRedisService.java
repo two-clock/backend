@@ -12,16 +12,16 @@ public class JwtRedisService {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    public void saveRefreshToken(String login, String refreshToken, long expiration) {
-        redisTemplate.opsForValue().set(login, refreshToken, expiration, TimeUnit.MILLISECONDS);
+    public void saveRefreshToken(String gitHubId, String refreshToken, long expiration) {
+        redisTemplate.opsForValue().set(gitHubId, refreshToken, expiration, TimeUnit.MILLISECONDS);
     }
 
-    public String getRefreshToken(String login) {
-        return redisTemplate.opsForValue().get(login);
+    public String getRefreshToken(String gitHubId) {
+        return redisTemplate.opsForValue().get(gitHubId);
     }
 
-    public void deleteRefreshToken(String login) {
-        redisTemplate.delete(login);
+    public void deleteRefreshToken(String gitHubId) {
+        redisTemplate.delete(gitHubId);
     }
 
     public void addToBlacklist(String jwtToken, long expiration) {

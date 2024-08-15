@@ -16,7 +16,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = memberRepository.findByLogin(username)
+        Member member = memberRepository.findByGitHubId(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         return new UserDetailsImpl(member);
     }
