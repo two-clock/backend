@@ -35,7 +35,7 @@ public class BoardRepositoryImpl implements CustomBoardRepository {
                         board.content,
                         board.nickname,
                         board.category.stringValue(),
-                        new QMemberInfoDto(board.member.login, board.member.avatarUrl, board.member.name)
+                        new QMemberInfoDto(board.member.login, board.member.gitHubId, board.member.avatarUrl, board.member.name)
                 ))
                 .from(board)
                 .join(board.member, member)
@@ -57,7 +57,7 @@ public class BoardRepositoryImpl implements CustomBoardRepository {
         builder.and(board.category.eq(Category.of(searchRequestDto.category())));
 
         // 검색어가 존재하는 경우
-        if(searchRequestDto.word() != null) {
+        if (searchRequestDto.word() != null) {
             switch (searchRequestDto.type()) {
                 case "title":
                     builder.and(board.title.contains(searchRequestDto.word()));
