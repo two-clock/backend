@@ -3,6 +3,7 @@ package com.twoclock.gitconnect.domain.member.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.twoclock.gitconnect.domain.member.dto.MemberGitHubTokenDto;
 import com.twoclock.gitconnect.domain.member.dto.MemberInfoDto;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.entity.constants.Role;
@@ -19,6 +20,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,15 +33,18 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.Date;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MemberAuthService {
 
     private static final String APPLICATION_FORM_URLENCODED_CHARSET_UTF8 = "application/x-www-form-urlencoded;charset=utf-8";
+    private static final String APPLICATION_VND_GITHUB_JSON = "application/vnd.github+json";
 
     private final MemberRepository memberRepository;
     private final JwtService jwtService;
     private final JwtRedisService jwtRedisService;
+    private final MemberAuthRedisService memberAuthRedisService;
 
     @Value("${github.client-id}")
     private String clientId;
@@ -47,21 +52,17 @@ public class MemberAuthService {
     @Value("${github.client-secret}")
     private String clientSecret;
 
-    @Value("${github.redirect-uri}")
-    private String redirectUri;
-
     public MemberInfoDto githubLogin(String code, HttpServletResponse httpServletResponse) {
-        String gitHubAccessToken = getGitHubAccessToken(code);
+        MemberGitHubTokenDto memberGitHubTokenDto = getMemberGitHubToken(code);
+        String gitHubAccessToken = memberGitHubTokenDto.accessToken();
+
         MemberInfoDto memberInfoDto = getGitHubMemberInfo(gitHubAccessToken);
         Member member = registerOrUpdateMember(memberInfoDto);
 
         deleteRefreshTokenIfExist(member.getGitHubId());
-
         JwtTokenInfoDto jwtTokenInfoDto = forceLogin(member);
-        String accessToken = jwtTokenInfoDto.accessToken();
-        String refreshToken = jwtTokenInfoDto.refreshToken();
 
-        setAuthJwtTokens(httpServletResponse, member, accessToken, refreshToken);
+        setAuthJwtTokens(httpServletResponse, member, jwtTokenInfoDto, memberGitHubTokenDto);
         return new MemberInfoDto(member.getLogin(), member.getGitHubId(), member.getAvatarUrl(), member.getName());
     }
 
@@ -75,10 +76,14 @@ public class MemberAuthService {
             throw new CustomException(ErrorCode.JWT_REFRESH_TOKEN_ERROR);
         }
 
+        String gitHubRefreshToken = memberAuthRedisService.getGitHubToken(gitHubId).refreshToken();
+        MemberGitHubTokenDto memberGitHubTokenDto = refreshMemberGitHubToken(gitHubRefreshToken);
+
         String newAccessToken = jwtService.generateAccessToken(member);
         String newRefreshToken = jwtService.generateRefreshToken(member);
+        JwtTokenInfoDto jwtTokenInfoDto = new JwtTokenInfoDto(newAccessToken, newRefreshToken);
 
-        setAuthJwtTokens(httpServletResponse, member, newAccessToken, newRefreshToken);
+        setAuthJwtTokens(httpServletResponse, member, jwtTokenInfoDto, memberGitHubTokenDto);
     }
 
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
@@ -97,34 +102,73 @@ public class MemberAuthService {
         deleteRefreshCookie.setPath("/");
         deleteRefreshCookie.setMaxAge(0);
         httpServletResponse.addCookie(deleteRefreshCookie);
+
+        String gitHubAccessToken = memberAuthRedisService.getGitHubToken(gitHubId).accessToken();
+        deleteMemberGitHubToken(gitHubAccessToken);
+        memberAuthRedisService.deleteGitHubToken(gitHubId);
     }
 
-    private String getGitHubAccessToken(String code) {
+    private MemberGitHubTokenDto getMemberGitHubToken(String code) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-type", APPLICATION_FORM_URLENCODED_CHARSET_UTF8);
-        headers.add("Accept", "application/json");
+        headers.add("Content-Type", APPLICATION_FORM_URLENCODED_CHARSET_UTF8);
+        headers.add("Accept", APPLICATION_VND_GITHUB_JSON);
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("client_id", clientId);
         body.add("client_secret", clientSecret);
-        body.add("redirect_uri", redirectUri);
         body.add("code", code);
 
         String result = RestClientUtil.post(GitHubUri.ACCESS_TOKEN.getUri(), headers, body);
 
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(result);
-            return jsonNode.get("access_token").asText();
+            String accessToken = jsonNode.get("access_token").asText();
+            String refreshToken = jsonNode.get("refresh_token").asText();
+            return new MemberGitHubTokenDto(accessToken, refreshToken);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private MemberGitHubTokenDto refreshMemberGitHubToken(String gitHubRefreshToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", APPLICATION_FORM_URLENCODED_CHARSET_UTF8);
+        headers.add("Accept", APPLICATION_VND_GITHUB_JSON);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("client_id", clientId);
+        body.add("client_secret", clientSecret);
+        body.add("grant_type", "refresh_token");
+        body.add("refresh_token", gitHubRefreshToken);
+
+        String result = RestClientUtil.post(GitHubUri.ACCESS_TOKEN.getUri(), headers, body);
+
+        try {
+            JsonNode jsonNode = new ObjectMapper().readTree(result);
+            String accessToken = jsonNode.get("access_token").asText();
+            String refreshToken = jsonNode.get("refresh_token").asText();
+            return new MemberGitHubTokenDto(accessToken, refreshToken);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void deleteMemberGitHubToken(String gitHubAccessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", APPLICATION_FORM_URLENCODED_CHARSET_UTF8);
+        headers.add("Accept", APPLICATION_VND_GITHUB_JSON);
+        headers.setBasicAuth(clientId, clientSecret);
+
+        String body = "{ \"access_token\": \"" + gitHubAccessToken + "\" }";
+
+        RestClientUtil.delete(String.format(GitHubUri.DELETE_TOKEN.getUri(), clientId), headers, body);
+    }
+
     private MemberInfoDto getGitHubMemberInfo(String gitHubAccessToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-type", APPLICATION_FORM_URLENCODED_CHARSET_UTF8);
+        headers.add("Content-Type", APPLICATION_FORM_URLENCODED_CHARSET_UTF8);
         headers.add("Authorization", "Bearer " + gitHubAccessToken);
-        headers.add("Accept", "application/vnd.github+json");
+        headers.add("Accept", APPLICATION_VND_GITHUB_JSON);
 
         String result = RestClientUtil.get(GitHubUri.USER_INFO.getUri(), headers);
 
@@ -173,7 +217,15 @@ public class MemberAuthService {
         return new JwtTokenInfoDto(jwtAccessToken, jwtRefreshToken);
     }
 
-    private void setAuthJwtTokens(HttpServletResponse httpServletResponse, Member member, String accessToken, String refreshToken) {
+    private void setAuthJwtTokens(
+            HttpServletResponse httpServletResponse,
+            Member member,
+            JwtTokenInfoDto jwtTokenInfoDto,
+            MemberGitHubTokenDto memberGitHubTokenDto
+    ) {
+        String accessToken = jwtTokenInfoDto.accessToken();
+        String refreshToken = jwtTokenInfoDto.refreshToken();
+
         httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + accessToken);
         jwtRedisService.saveRefreshToken(member.getGitHubId(), refreshToken, JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
 
@@ -182,6 +234,11 @@ public class MemberAuthService {
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
         httpServletResponse.addCookie(refreshCookie);
+
+        String gitHubAccessToken = memberGitHubTokenDto.accessToken();
+        String gitHubRefreshToken = memberGitHubTokenDto.refreshToken();
+
+        memberAuthRedisService.saveGitHubToken(member.getGitHubId(), gitHubAccessToken, gitHubRefreshToken);
     }
 
     private void deleteRefreshTokenIfExist(String login) {
