@@ -1,6 +1,7 @@
 package com.twoclock.gitconnect.global.jwt.service;
 
 import com.twoclock.gitconnect.domain.member.entity.Member;
+import com.twoclock.gitconnect.global.jwt.dto.JwtTokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -72,6 +73,12 @@ public class JwtService {
     public long getTokenExpirationTime(String jwtToken) {
         return getClaims(jwtToken).getExpiration()
                 .getTime();
+    }
+
+    public JwtTokenDto createJwtTokens(Member member) {
+        String accessToken = generateAccessToken(member);
+        String refreshToken = generateRefreshToken(member);
+        return new JwtTokenDto(accessToken, refreshToken);
     }
 
     private Claims getClaims(String jwtToken) {

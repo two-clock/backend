@@ -1,4 +1,4 @@
-package com.twoclock.gitconnect.global.constants;
+package com.twoclock.gitconnect.openapi.github.constants;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

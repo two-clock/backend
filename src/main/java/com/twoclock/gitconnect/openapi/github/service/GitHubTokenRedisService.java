@@ -1,13 +1,13 @@
-package com.twoclock.gitconnect.domain.member.service;
+package com.twoclock.gitconnect.openapi.github.service;
 
-import com.twoclock.gitconnect.domain.member.dto.MemberGitHubTokenDto;
+import com.twoclock.gitconnect.openapi.github.dto.GitHubTokenDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class MemberAuthRedisService {
+public class GitHubTokenRedisService {
 
     private static final String GITHUB_ID = "github-id:";
 
@@ -15,13 +15,13 @@ public class MemberAuthRedisService {
 
     public void saveGitHubToken(String gitHubId, String gitHubAccessToken, String gitHubRefreshToken) {
         String key = GITHUB_ID + gitHubId;
-        MemberGitHubTokenDto memberGitHubTokenDto = new MemberGitHubTokenDto(gitHubAccessToken, gitHubRefreshToken);
-        redisTemplate.opsForValue().set(key, memberGitHubTokenDto);
+        GitHubTokenDto gitHubTokenDto = new GitHubTokenDto(gitHubAccessToken, gitHubRefreshToken);
+        redisTemplate.opsForValue().set(key, gitHubTokenDto);
     }
 
-    public MemberGitHubTokenDto getGitHubToken(String gitHubId) {
+    public GitHubTokenDto getGitHubToken(String gitHubId) {
         String key = GITHUB_ID + gitHubId;
-        return (MemberGitHubTokenDto) redisTemplate.opsForValue().get(key);
+        return (GitHubTokenDto) redisTemplate.opsForValue().get(key);
     }
 
     public void deleteGitHubToken(String gitHubId) {

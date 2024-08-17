@@ -1,6 +1,6 @@
 package com.twoclock.gitconnect.domain.member.web;
 
-import com.twoclock.gitconnect.domain.member.dto.MemberInfoDto;
+import com.twoclock.gitconnect.domain.member.dto.MemberLoginRespDto;
 import com.twoclock.gitconnect.domain.member.service.MemberAuthService;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +17,7 @@ public class MemberAuthController {
 
     @GetMapping("/github/callback")
     public RestResponse githubLogin(@RequestParam String code, HttpServletResponse httpServletResponse) {
-        MemberInfoDto responseDto = memberAuthService.githubLogin(code, httpServletResponse);
+        MemberLoginRespDto responseDto = memberAuthService.githubLogin(code, httpServletResponse);
         return new RestResponse(responseDto);
     }
 

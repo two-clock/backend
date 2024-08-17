@@ -23,7 +23,7 @@ public enum ErrorCode {
 
     NOT_FOUND_CATEGORY(HttpStatus.NOT_FOUND, "C-001", "찾을 수 없는 카테고리입니다."),
 
-    GITHUB_SERVER_ERROR(HttpStatus.BAD_REQUEST, "G-001", "GitHub 서버 에러가 발생했습니다."),
+    OPEN_API_SERVER_ERROR(HttpStatus.BAD_REQUEST, "G-001", "Open API 서버 에러가 발생했습니다."),
 
     FAIL_SAVE_BOARD(HttpStatus.INTERNAL_SERVER_ERROR, "B-001", "게시글 저장에 실패하였습니다."),
     FAIL_MODIFY_BOARD(HttpStatus.INTERNAL_SERVER_ERROR, "B-002", "게시글 수정에 실패하였습니다."),

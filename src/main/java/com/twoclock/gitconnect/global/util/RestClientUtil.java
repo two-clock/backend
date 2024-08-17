@@ -23,7 +23,7 @@ public class RestClientUtil {
                 .body(body)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, ((request, response) -> {
-                    throw new CustomException(ErrorCode.GITHUB_SERVER_ERROR);
+                    throw new CustomException(ErrorCode.OPEN_API_SERVER_ERROR);
                 }))
                 .body(String.class);
     }
@@ -34,7 +34,7 @@ public class RestClientUtil {
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, ((request, response) -> {
-                    throw new CustomException(ErrorCode.GITHUB_SERVER_ERROR);
+                    throw new CustomException(ErrorCode.OPEN_API_SERVER_ERROR);
                 }))
                 .body(String.class);
     }
@@ -46,7 +46,7 @@ public class RestClientUtil {
                 .body(body)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, ((request, response) -> {
-                    throw new CustomException(ErrorCode.GITHUB_SERVER_ERROR);
+                    throw new CustomException(ErrorCode.OPEN_API_SERVER_ERROR);
                 }))
                 .toBodilessEntity();
     }
