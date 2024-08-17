@@ -10,10 +10,10 @@ import com.twoclock.gitconnect.global.jwt.dto.JwtTokenDto;
 import com.twoclock.gitconnect.global.jwt.service.JwtRedisService;
 import com.twoclock.gitconnect.global.jwt.service.JwtService;
 import com.twoclock.gitconnect.global.security.UserDetailsImpl;
+import com.twoclock.gitconnect.global.util.CookieUtil;
 import com.twoclock.gitconnect.openapi.github.dto.GitHubTokenDto;
 import com.twoclock.gitconnect.openapi.github.service.GitHubTokenRedisService;
 import com.twoclock.gitconnect.openapi.github.service.GithubAPIService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +67,7 @@ public class MemberAuthService {
         blacklistToken(jwtAccessToken);
         jwtRedisService.deleteRefreshToken(gitHubId);
 
-        clearCookie(response, "refreshToken");
+        CookieUtil.deleteCookie(response, "refreshToken");
         deleteGitHubTokens(gitHubId);
     }
 
@@ -108,20 +108,12 @@ public class MemberAuthService {
 
     private void setAuthTokens(HttpServletResponse response, Member member, JwtTokenDto jwtTokenDto, GitHubTokenDto gitHubTokenDto) {
         setAuthorizationHeader(response, jwtTokenDto.accessToken());
-        setRefreshTokenCookie(response, jwtTokenDto.refreshToken());
+        CookieUtil.addCookie(response, "refreshToken", jwtTokenDto.refreshToken(), JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
         saveTokensToRedis(member, jwtTokenDto, gitHubTokenDto);
     }
 
     private void setAuthorizationHeader(HttpServletResponse response, String accessToken) {
         response.addHeader(HttpHeaders.AUTHORIZATION, JwtService.BEARER_PREFIX + accessToken);
-    }
-
-    private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
-        response.addCookie(refreshCookie);
     }
 
     private void saveTokensToRedis(Member member, JwtTokenDto jwtTokenDto, GitHubTokenDto gitHubTokenDto) {
@@ -150,14 +142,6 @@ public class MemberAuthService {
         long expirationTime = jwtService.getTokenExpirationTime(jwtAccessToken);
         long now = new Date().getTime();
         jwtRedisService.addToBlacklist(jwtAccessToken, expirationTime - now);
-    }
-
-    private void clearCookie(HttpServletResponse response, String cookieName) {
-        Cookie cookie = new Cookie(cookieName, null);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
     }
 
     private void deleteGitHubTokens(String gitHubId) {
