@@ -15,17 +15,17 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class GithubAPISerivce {
+public class GithubAPIService {
 
     private final ObjectMapper objectMapper;
 
-    public List<FollowRespDto> getFollowers(String accessToken) throws JsonProcessingException {
+    public List<FollowRespDto> getFollowers(String accessToken) {
         HttpHeaders headers = getHeaders(accessToken);
         String result = RestClientUtil.get(GitHubUri.FOLLOWER_LIST.getUri(), headers);
         return getFollowersFromJson(result);
     }
 
-    public List<FollowRespDto> getFollowing(String accessToken) throws JsonProcessingException {
+    public List<FollowRespDto> getFollowing(String accessToken) {
         HttpHeaders headers = getHeaders(accessToken);
         String result = RestClientUtil.get(GitHubUri.FOLLOWING_LIST.getUri(), headers);
         return getFollowersFromJson(result);
@@ -39,7 +39,7 @@ public class GithubAPISerivce {
         return headers;
     }
 
-    private List<FollowRespDto> getFollowersFromJson(String result) throws JsonProcessingException {
+    private List<FollowRespDto> getFollowersFromJson(String result) {
         try {
             List<FollowRespDto> users = new ArrayList<>();
             JsonNode arrayNode  = objectMapper.readTree(result);

@@ -1,9 +1,8 @@
 package com.twoclock.gitconnect.openapi.github.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import com.twoclock.gitconnect.openapi.github.dto.FollowRespDto;
-import com.twoclock.gitconnect.openapi.github.service.GithubAPISerivce;
+import com.twoclock.gitconnect.openapi.github.service.GithubAPIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,23 +16,23 @@ import java.util.List;
 @RestController
 public class GithubAPIController {
 
-    private final GithubAPISerivce githubAPISerivce;
+    private final GithubAPIService githubAPIService;
 
     // 임시용
     @Value("${github.access-token}")
     private String accessToken;
 
     @GetMapping("/followers")
-    public RestResponse getFollowers() throws JsonProcessingException {
+    public RestResponse getFollowers() {
         // TODO : 토큰에서 Github Access Token을 추출 해야함.
-        List<FollowRespDto> result = githubAPISerivce.getFollowers(accessToken);
+        List<FollowRespDto> result = githubAPIService.getFollowers(accessToken);
         return new RestResponse(result);
     }
 
     @GetMapping("/following")
-    public RestResponse getFollowing() throws JsonProcessingException {
+    public RestResponse getFollowing() {
         // TODO : 토큰에서 Github Access Token을 추출 해야함.
-        List<FollowRespDto> result = githubAPISerivce.getFollowing(accessToken);
+        List<FollowRespDto> result = githubAPIService.getFollowing(accessToken);
         return new RestResponse(result);
     }
 }
