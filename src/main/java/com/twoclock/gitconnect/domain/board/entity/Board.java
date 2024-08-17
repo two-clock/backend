@@ -43,8 +43,8 @@ public class Board extends BaseEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column(nullable = false )
-    private boolean isView = true;
+    @Column(nullable = false)
+    private final boolean isView = true;
 
     @Builder
     public Board(Member member, String nickname, Category category, String title, String content) {

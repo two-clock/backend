@@ -20,7 +20,7 @@ public class BoardController {
     private final BoardService boardService;
 
     @PostMapping
-    public RestResponse saveBoard(@RequestBody @Valid BoardSaveReqDto boardSaveReqDto){
+    public RestResponse saveBoard(@RequestBody @Valid BoardSaveReqDto boardSaveReqDto) {
         // TODO : 로그인 유저인지 검증 필요
         Long userId = 1L;
 
