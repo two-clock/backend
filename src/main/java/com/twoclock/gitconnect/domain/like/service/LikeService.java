@@ -22,12 +22,8 @@ public class LikeService {
 
     @Transactional
     public void addLikeToBoard(Long boardId, Long userId) {
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
-        );
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
-        );
+        Board board = validateBoard(boardId);
+        Member member = validateMember(userId);
         boolean duplicated = likeRepository.existsByBoardAndMember(board, member);
         if (duplicated) {
             throw new CustomException(ErrorCode.DUPLICATED_LIKE);
@@ -38,5 +34,17 @@ public class LikeService {
                 .member(member)
                 .build();
         likeRepository.save(likes);
+    }
+
+    private Board validateBoard(Long boardId) {
+        return boardRepository.findById(boardId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
+        );
+    }
+
+    private Member validateMember(Long userId) {
+        return memberRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+        );
     }
 }
