@@ -49,10 +49,10 @@ public class BoardService {
     public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long userId) {
 
         Member member = memberRepository.findById(userId).orElseThrow(
-                ()-> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
         Board board = boardRepository.findById(boardUpdateReqDto.id()).orElseThrow(
-                ()-> new CustomException(ErrorCode.NOT_FOUND_BOARD)
+                () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
         );
         board.checkUserId(member.getId());
         board.updateBoard(boardUpdateReqDto.title(), boardUpdateReqDto.content());
@@ -82,10 +82,10 @@ public class BoardService {
     @Transactional
     public void deleteBoard(Long boardKey, Long userId) {
         Member member = memberRepository.findById(userId).orElseThrow(
-                ()-> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
         Board board = boardRepository.findById(boardKey).orElseThrow(
-                ()-> new CustomException(ErrorCode.NOT_FOUND_BOARD)
+                () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
         );
         board.checkUserId(member.getId());
         boardRepository.delete(board);

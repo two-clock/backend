@@ -2,16 +2,12 @@ package com.twoclock.gitconnect.global.util;
 
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
-@Slf4j
-@Component
 public class RestClientUtil {
 
     private static final RestClient restClient = RestClient.create();
@@ -23,7 +19,7 @@ public class RestClientUtil {
                 .body(body)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, ((request, response) -> {
-                    throw new CustomException(ErrorCode.GITHUB_SERVER_ERROR);
+                    throw new CustomException(ErrorCode.OPEN_API_SERVER_ERROR);
                 }))
                 .body(String.class);
     }
@@ -34,7 +30,7 @@ public class RestClientUtil {
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, ((request, response) -> {
-                    throw new CustomException(ErrorCode.GITHUB_SERVER_ERROR);
+                    throw new CustomException(ErrorCode.OPEN_API_SERVER_ERROR);
                 }))
                 .body(String.class);
     }
@@ -46,7 +42,7 @@ public class RestClientUtil {
                 .body(body)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, ((request, response) -> {
-                    throw new CustomException(ErrorCode.GITHUB_SERVER_ERROR);
+                    throw new CustomException(ErrorCode.OPEN_API_SERVER_ERROR);
                 }))
                 .toBodilessEntity();
     }

@@ -7,7 +7,7 @@ import com.twoclock.gitconnect.domain.board.dto.QSearchResponseDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
-import com.twoclock.gitconnect.domain.member.dto.QMemberInfoDto;
+import com.twoclock.gitconnect.domain.member.dto.QMemberLoginRespDto;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -35,7 +35,7 @@ public class BoardRepositoryImpl implements CustomBoardRepository {
                         board.content,
                         board.nickname,
                         board.category.stringValue(),
-                        new QMemberInfoDto(board.member.login, board.member.gitHubId, board.member.avatarUrl, board.member.name)
+                        new QMemberLoginRespDto(board.member.login, board.member.gitHubId, board.member.avatarUrl, board.member.name)
                 ))
                 .from(board)
                 .join(board.member, member)

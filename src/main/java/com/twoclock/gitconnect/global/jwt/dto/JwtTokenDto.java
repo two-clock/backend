@@ -1,6 +1,6 @@
 package com.twoclock.gitconnect.global.jwt.dto;
 
-public record JwtTokenInfoDto(
+public record JwtTokenDto(
         String accessToken,
         String refreshToken
 ) {
