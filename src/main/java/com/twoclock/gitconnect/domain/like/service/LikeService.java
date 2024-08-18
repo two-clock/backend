@@ -36,6 +36,16 @@ public class LikeService {
         likeRepository.save(likes);
     }
 
+    @Transactional
+    public void deleteLikeToBoard(Long boardId, Long userId) {
+        Board board = validateBoard(boardId);
+        Member member = validateMember(userId);
+        Likes likes = likeRepository.findByBoardAndMember(board, member).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_LIKE)
+        );
+        likeRepository.delete(likes);
+    }
+
     private Board validateBoard(Long boardId) {
         return boardRepository.findById(boardId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
