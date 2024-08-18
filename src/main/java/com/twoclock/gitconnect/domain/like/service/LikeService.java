@@ -2,7 +2,7 @@ package com.twoclock.gitconnect.domain.like.service;
 
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
-import com.twoclock.gitconnect.domain.like.entity.Like;
+import com.twoclock.gitconnect.domain.like.entity.Likes;
 import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
@@ -33,10 +33,10 @@ public class LikeService {
             throw new CustomException(ErrorCode.DUPLICATED_LIKE);
         }
 
-        Like like = Like.builder()
+        Likes likes = Likes.builder()
                 .board(board)
                 .member(member)
                 .build();
-        likeRepository.save(like);
+        likeRepository.save(likes);
     }
 }

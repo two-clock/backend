@@ -15,9 +15,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "likes")
 @EntityListeners(AuditingEntityListener.class)
-public class Like {
+public class Likes {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +35,7 @@ public class Like {
     private LocalDateTime createdDateTime;
 
     @Builder
-    public Like(Board board, Member member) {
+    public Likes(Board board, Member member) {
         this.board = board;
         this.member = member;
     }
