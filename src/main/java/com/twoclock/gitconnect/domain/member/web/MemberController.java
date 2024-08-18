@@ -1,6 +1,6 @@
 package com.twoclock.gitconnect.domain.member.web;
 
-import com.twoclock.gitconnect.domain.member.dto.MemberProfileResponseDto;
+import com.twoclock.gitconnect.domain.member.dto.MemberProfileRespDto;
 import com.twoclock.gitconnect.domain.member.service.MemberService;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import com.twoclock.gitconnect.global.security.UserDetailsImpl;
@@ -20,7 +20,7 @@ public class MemberController {
     @GetMapping
     public RestResponse getMember(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         String gitHubId = userDetails.getUsername();
-        MemberProfileResponseDto responseDto = memberService.getMember(gitHubId);
+        MemberProfileRespDto responseDto = memberService.getMember(gitHubId);
         return new RestResponse(responseDto);
     }
 }
