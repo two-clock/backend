@@ -21,9 +21,9 @@ public class LikeService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void addLikeToBoard(Long boardId, Long userId) {
+    public void addLikeToBoard(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
-        Member member = validateMember(userId);
+        Member member = validateMember(githubId);
         boolean duplicated = likeRepository.existsByBoardAndMember(board, member);
         if (duplicated) {
             throw new CustomException(ErrorCode.DUPLICATED_LIKE);
@@ -37,9 +37,9 @@ public class LikeService {
     }
 
     @Transactional
-    public void deleteLikeToBoard(Long boardId, Long userId) {
+    public void deleteLikeToBoard(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
-        Member member = validateMember(userId);
+        Member member = validateMember(githubId);
         Likes likes = likeRepository.findByBoardAndMember(board, member).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_LIKE)
         );
@@ -52,8 +52,8 @@ public class LikeService {
         );
     }
 
-    private Member validateMember(Long userId) {
-        return memberRepository.findById(userId).orElseThrow(
+    private Member validateMember(String githubId) {
+        return memberRepository.findByGitHubId(githubId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
     }
