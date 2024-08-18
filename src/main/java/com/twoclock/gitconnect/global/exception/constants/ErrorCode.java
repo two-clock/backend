@@ -28,6 +28,8 @@ public enum ErrorCode {
     FAIL_SAVE_BOARD(HttpStatus.INTERNAL_SERVER_ERROR, "B-001", "게시글 저장에 실패하였습니다."),
     FAIL_MODIFY_BOARD(HttpStatus.INTERNAL_SERVER_ERROR, "B-002", "게시글 수정에 실패하였습니다."),
     NOT_FOUND_BOARD(HttpStatus.NOT_FOUND, "B-003", "해당 게시판을 찾을 수 없습니다."),
+
+    DUPLICATED_LIKE(HttpStatus.BAD_REQUEST, "L-001", "이미 좋아요를 누른 게시글입니다."),
     ;
 
     private final HttpStatus httpStatus;
