@@ -160,7 +160,8 @@ public class GithubAPIService {
         try {
             List<RepositoryRespDto> repositories = new ArrayList<>();
             JsonNode arrayNode = objectMapper.readTree(result);
-            for (JsonNode node : arrayNode) {
+
+            arrayNode.forEach(node -> {
                 String name = node.path("name").asText();
                 String fullName = node.path("full_name").asText();
                 String visibility = node.path("visibility").asText();
@@ -171,7 +172,7 @@ public class GithubAPIService {
                 repositories.add(
                         new RepositoryRespDto(name, fullName, visibility, htmlUrl, description, createdAt)
                 );
-            }
+            });
             return repositories;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error parsing repository response", e);
