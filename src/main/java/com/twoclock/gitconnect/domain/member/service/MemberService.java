@@ -24,7 +24,7 @@ public class MemberService {
     private final GitHubTokenRedisService gitHubTokenRedisService;
     private final GithubAPIService githubAPIService;
 
-    @Cacheable(value = "member-profile", key = "#gitHubId", unless = "#result == null")
+    @Cacheable(value = "getMember", key = "'member:github-id:' + #gitHubId", cacheManager = "memberCacheManager")
     @Transactional(readOnly = true)
     public MemberProfileRespDto getMember(String gitHubId) {
         Member member = validateMember(gitHubId);
