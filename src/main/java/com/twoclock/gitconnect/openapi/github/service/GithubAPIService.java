@@ -8,6 +8,7 @@ import com.twoclock.gitconnect.global.util.RestClientUtil;
 import com.twoclock.gitconnect.openapi.github.constants.GitHubUri;
 import com.twoclock.gitconnect.openapi.github.dto.FollowRespDto;
 import com.twoclock.gitconnect.openapi.github.dto.GitHubTokenDto;
+import com.twoclock.gitconnect.openapi.github.dto.RepositoryRespDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -70,6 +71,12 @@ public class GithubAPIService {
         HttpHeaders headers = createHeadersWithAccessToken(accessToken);
         String result = RestClientUtil.get(GitHubUri.FOLLOWING_LIST.getUri(), headers);
         return parseFollowResponse(result);
+    }
+
+    public List<RepositoryRespDto> getRepositories(String accessToken) {
+        HttpHeaders headers = createHeadersWithAccessToken(accessToken);
+        String result = RestClientUtil.get(GitHubUri.REPOSITORY_LIST.getUri(), headers);
+        return parseRepositoryResponse(result);
     }
 
     private HttpHeaders createHeadersWithAccessToken(String accessToken) {
@@ -146,6 +153,29 @@ public class GithubAPIService {
             return users;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error parsing followers/following response", e);
+        }
+    }
+
+    private List<RepositoryRespDto> parseRepositoryResponse(String result) {
+        try {
+            List<RepositoryRespDto> repositories = new ArrayList<>();
+            JsonNode arrayNode = objectMapper.readTree(result);
+
+            arrayNode.forEach(node -> {
+                String name = node.path("name").asText();
+                String fullName = node.path("full_name").asText();
+                String visibility = node.path("visibility").asText();
+                String htmlUrl = node.path("html_url").asText();
+                String description = node.path("description").asText();
+                String createdAt = node.path("created_at").asText();
+
+                repositories.add(
+                        new RepositoryRespDto(name, fullName, visibility, htmlUrl, description, createdAt)
+                );
+            });
+            return repositories;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error parsing repository response", e);
         }
     }
 }
