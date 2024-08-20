@@ -1,11 +1,14 @@
 package com.twoclock.gitconnect.domain.like.web;
 
+import com.twoclock.gitconnect.domain.like.dto.LikesRespDto;
 import com.twoclock.gitconnect.domain.like.service.LikeService;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import com.twoclock.gitconnect.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +33,9 @@ public class LikeController {
         return RestResponse.OK();
     }
 
-
-
+    @GetMapping("/{boardId}")
+    public RestResponse getLikesByBoardId(@PathVariable("boardId") Long boardId) {
+        List<LikesRespDto> result = likeService.getLikesByBoardId(boardId);
+        return new RestResponse(result);
+    }
 }
