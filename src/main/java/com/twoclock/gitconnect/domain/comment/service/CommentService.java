@@ -9,6 +9,7 @@ import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class CommentService {
 
     @Transactional
     public void saveComment(CommentRegReqDto dto, String githubId) {
+        filteringBadWord(dto.content());
         Board board = validateBoard(dto.boardId());
         Member member = validateMember(githubId);
 
@@ -45,5 +47,12 @@ public class CommentService {
         return memberRepository.findByGitHubId(githubId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
+    }
+
+    private void filteringBadWord(String content) {
+        BadWordFiltering filtering = new BadWordFiltering();
+        if (filtering.check(content)) {
+            throw new CustomException(ErrorCode.BAD_WORD);
+        }
     }
 }
