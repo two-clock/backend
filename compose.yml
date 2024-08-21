@@ -18,3 +18,14 @@ services:
     image: redis:7.2
     ports:
       - 6379:6379
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=1234
+    volumes:
+      - ./mongodb-data:/data

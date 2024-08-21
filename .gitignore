@@ -43,3 +43,4 @@ application-local.yml
 
 ### Docker ###
 mysql-data/
+mongodb-data/
