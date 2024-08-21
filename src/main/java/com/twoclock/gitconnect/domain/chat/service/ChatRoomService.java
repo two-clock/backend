@@ -16,6 +16,8 @@ import java.util.Arrays;
 @Service
 public class ChatRoomService {
 
+    private static final String CHATROOM_DELIMITER = "-";
+
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
 
@@ -62,7 +64,7 @@ public class ChatRoomService {
 
         long minMemberId = Math.min(createdGitHubIdAsLong, receiveGitHubIdAsLong);
         long maxMemberId = Math.max(createdGitHubIdAsLong, receiveGitHubIdAsLong);
-        String chatRoomId = minMemberId + ":" + maxMemberId;
+        String chatRoomId = minMemberId + CHATROOM_DELIMITER + maxMemberId;
 
         if (chatRoomRepository.existsByChatRoomId(chatRoomId)) {
             throw new CustomException(ErrorCode.ALREADY_EXIST_CHAT_ROOM);
@@ -71,7 +73,7 @@ public class ChatRoomService {
     }
 
     private void checkAccessChatRoom(String githubId, String chatRoomId) {
-        boolean isCheck = Arrays.asList(chatRoomId.split(":")).contains(githubId);
+        boolean isCheck = Arrays.asList(chatRoomId.split(CHATROOM_DELIMITER)).contains(githubId);
         if (!isCheck) {
             throw new CustomException(ErrorCode.NO_ACCESS_CHAT_ROOM);
         }
