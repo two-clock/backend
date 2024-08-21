@@ -5,10 +5,7 @@ import com.twoclock.gitconnect.global.model.RestResponse;
 import com.twoclock.gitconnect.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/v1/chats")
 @RequiredArgsConstructor
@@ -24,6 +21,16 @@ public class ChatRoomController {
     ) {
         String createdGitHubId = userDetails.getUsername();
         chatRoomService.createChatRoom(createdGitHubId, receiveGitHubId);
+        return RestResponse.OK();
+    }
+
+    @DeleteMapping("/{id}")
+    public RestResponse deleteChatRoom(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable("id") Long id
+    ) {
+        String githubId = userDetails.getUsername();
+        chatRoomService.deleteChatRoom(githubId, id);
         return RestResponse.OK();
     }
 }
