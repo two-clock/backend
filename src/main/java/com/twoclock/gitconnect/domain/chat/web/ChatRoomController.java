@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api/v1/chats")
+@RequestMapping("/api/v1/chatrooms")
 @RequiredArgsConstructor
 @RestController
 public class ChatRoomController {
