@@ -21,8 +21,8 @@ public class ChatRoomService {
 
     @Transactional
     public void createChatRoom(String createdGitHubId, String receiveGitHubId) {
-        Member createdMember = validateMember(createdGitHubId);
-        Member receiveMember = validateMember(receiveGitHubId);
+        Member createdMember = validateMemberByGitHubId(createdGitHubId);
+        Member receiveMember = validateMemberByGitHubId(receiveGitHubId);
 
         String chatRoomId = getChatRoomId(createdMember.getGitHubId(), receiveMember.getGitHubId());
 
@@ -37,21 +37,21 @@ public class ChatRoomService {
 
     @Transactional
     public void deleteChatRoom(String githubId, Long id) {
-        Member member = validateMember(githubId);
-        ChatRoom chatRoom = validateChatRoom(id);
+        Member member = validateMemberByGitHubId(githubId);
+        ChatRoom chatRoom = validateChatRoomById(id);
 
         checkAccessChatRoom(member.getGitHubId(), chatRoom.getChatRoomId());
         chatRoomRepository.delete(chatRoom);
     }
 
-    private ChatRoom validateChatRoom(Long id) {
+    private ChatRoom validateChatRoomById(Long id) {
         return chatRoomRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_CHAT_ROOM)
         );
     }
 
-    private Member validateMember(String createdGitHubId) {
-        return memberRepository.findByGitHubId(createdGitHubId).orElseThrow(
+    private Member validateMemberByGitHubId(String gitHubId) {
+        return memberRepository.findByGitHubId(gitHubId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
     }
