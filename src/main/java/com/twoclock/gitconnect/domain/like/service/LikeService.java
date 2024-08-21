@@ -54,8 +54,7 @@ public class LikeService {
     public List<LikesRespDto> getLikesByBoardId(Long boardId) {
         Board board = validateBoard(boardId);
         List<Likes> likes = likeRepository.findAllByBoard(board);
-        List<LikesRespDto> response = likes.stream().map(LikesRespDto::new).toList();
-        return response;
+        return likes.stream().map(LikesRespDto::new).toList();
     }
 
     private Board validateBoard(Long boardId) {
