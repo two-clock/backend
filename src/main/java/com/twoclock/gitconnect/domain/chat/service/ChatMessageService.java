@@ -31,14 +31,17 @@ public class ChatMessageService {
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoomId(chatRoom.getChatRoomId())
-                .senderGitHubId(member.getGitHubId())
+                .senderMember(member)
                 .message(chatMessageSaveReqDto.message())
                 .createdDateTime(LocalDateTime.now())
                 .build();
         chatMessageRepository.save(chatMessage);
 
         return new ChatMessageSaveRespDto(
-                member.getLogin(), member.getGitHubId(), chatMessage.getMessage(), chatMessage.getCreatedDateTime()
+                chatMessage.getSenderMember().getLogin(),
+                chatMessage.getSenderMember().getGitHubId(),
+                chatMessage.getMessage(),
+                chatMessage.getCreatedDateTime()
         );
     }
 

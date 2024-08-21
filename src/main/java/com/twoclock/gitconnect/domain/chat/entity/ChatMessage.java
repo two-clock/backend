@@ -1,5 +1,6 @@
 package com.twoclock.gitconnect.domain.chat.entity;
 
+import com.twoclock.gitconnect.domain.member.entity.Member;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,14 +18,14 @@ public class ChatMessage {
     @Id
     private String id;
     private String chatRoomId;
-    private String senderGitHubId;
+    private Member senderMember;
     private String message;
     private LocalDateTime createdDateTime;
 
     @Builder
-    public ChatMessage(String chatRoomId, String senderGitHubId, String message, LocalDateTime createdDateTime) {
+    public ChatMessage(String chatRoomId, Member senderMember, String message, LocalDateTime createdDateTime) {
         this.chatRoomId = chatRoomId;
-        this.senderGitHubId = senderGitHubId;
+        this.senderMember = senderMember;
         this.message = message;
         this.createdDateTime = createdDateTime;
     }
