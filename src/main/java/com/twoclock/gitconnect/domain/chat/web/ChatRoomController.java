@@ -24,13 +24,13 @@ public class ChatRoomController {
         return RestResponse.OK();
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{chatRoomId}")
     public RestResponse deleteChatRoom(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PathVariable("id") Long id
+            @PathVariable("chatRoomId") String chatRoomId
     ) {
         String githubId = userDetails.getUsername();
-        chatRoomService.deleteChatRoom(githubId, id);
+        chatRoomService.deleteChatRoom(githubId, chatRoomId);
         return RestResponse.OK();
     }
 }
