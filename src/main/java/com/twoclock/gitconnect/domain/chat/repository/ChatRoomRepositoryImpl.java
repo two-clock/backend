@@ -25,7 +25,6 @@ public class ChatRoomRepositoryImpl implements CustomChatRoomRepository {
                 .where(chatRoom.createdMember.eq(member)
                         .or(chatRoom.receivedMember.eq(member))
                 )
-                .orderBy(chatRoom.createdDateTime.desc())
                 .groupBy(chatRoom.id)
                 .fetch();
     }

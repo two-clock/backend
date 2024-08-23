@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -61,6 +62,7 @@ public class ChatRoomService {
 
         return chatRooms.stream()
                 .map(chatRoom -> getChatRoomDetails(chatRoom, githubId))
+                .sorted(Comparator.comparing(ChatRoomRespDto::createdDateTime).reversed())
                 .toList();
     }
 
