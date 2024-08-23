@@ -1,16 +1,21 @@
 package com.twoclock.gitconnect.domain.chat.service;
 
+import com.twoclock.gitconnect.domain.chat.dto.ChatMessageRespDto;
 import com.twoclock.gitconnect.domain.chat.entity.ChatRoom;
+import com.twoclock.gitconnect.domain.chat.repository.ChatMessageRepository;
 import com.twoclock.gitconnect.domain.chat.repository.ChatRoomRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -20,6 +25,7 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Transactional
     public void createChatRoom(String createdGitHubId, String receiveGitHubId) {
@@ -44,6 +50,25 @@ public class ChatRoomService {
 
         checkAccessChatRoom(member.getGitHubId(), chatRoom.getChatRoomId());
         chatRoomRepository.delete(chatRoom);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatMessageRespDto> chatRoomMessages(String githubId, String chatRoomId, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.ASC, "createdDateTime");
+
+        Member member = validateMemberByGitHubId(githubId);
+        ChatRoom chatRoom = validateChatRoomById(chatRoomId);
+        checkAccessChatRoom(member.getGitHubId(), chatRoom.getChatRoomId());
+
+        return chatMessageRepository.findAllByChatRoomId(chatRoomId, pageRequest)
+                .getContent()
+                .stream()
+                .map(chatRoomMessage -> new ChatMessageRespDto(
+                        chatRoomMessage.getSenderMember().getLogin(),
+                        chatRoomMessage.getMessage(),
+                        chatRoomMessage.getCreatedDateTime()
+                ))
+                .toList();
     }
 
     private ChatRoom validateChatRoomById(String chatRoomId) {
