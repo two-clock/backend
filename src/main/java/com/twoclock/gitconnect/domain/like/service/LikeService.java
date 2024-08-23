@@ -2,6 +2,7 @@ package com.twoclock.gitconnect.domain.like.service;
 
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
+import com.twoclock.gitconnect.domain.like.dto.LikesRespDto;
 import com.twoclock.gitconnect.domain.like.entity.Likes;
 import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
@@ -11,6 +12,9 @@ import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +48,13 @@ public class LikeService {
                 () -> new CustomException(ErrorCode.NOT_FOUND_LIKE)
         );
         likeRepository.delete(likes);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LikesRespDto> getLikesByBoardId(Long boardId) {
+        Board board = validateBoard(boardId);
+        List<Likes> likes = likeRepository.findAllByBoard(board);
+        return likes.stream().map(LikesRespDto::new).toList();
     }
 
     private Board validateBoard(Long boardId) {
