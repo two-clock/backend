@@ -1,6 +1,8 @@
 package com.twoclock.gitconnect.domain.chat.service;
 
 import com.twoclock.gitconnect.domain.chat.dto.ChatMessageRespDto;
+import com.twoclock.gitconnect.domain.chat.dto.ChatRoomRespDto;
+import com.twoclock.gitconnect.domain.chat.entity.ChatMessage;
 import com.twoclock.gitconnect.domain.chat.entity.ChatRoom;
 import com.twoclock.gitconnect.domain.chat.repository.ChatMessageRepository;
 import com.twoclock.gitconnect.domain.chat.repository.ChatRoomRepository;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -50,6 +53,17 @@ public class ChatRoomService {
 
         checkAccessChatRoom(member.getGitHubId(), chatRoom.getChatRoomId());
         chatRoomRepository.delete(chatRoom);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatRoomRespDto> getChatRooms(String githubId) {
+        Member member = validateMemberByGitHubId(githubId);
+        List<ChatRoom> chatRooms = chatRoomRepository.findUniqueChatRoomsByMember(member);
+
+        return chatRooms.stream()
+                .map(chatRoom -> getChatRoomDetails(chatRoom, githubId))
+                .sorted(Comparator.comparing(ChatRoomRespDto::createdDateTime).reversed())
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -102,5 +116,27 @@ public class ChatRoomService {
         if (!isCheck) {
             throw new CustomException(ErrorCode.NO_ACCESS_CHAT_ROOM);
         }
+    }
+
+    private ChatRoomRespDto getChatRoomDetails(ChatRoom chatRoom, String githubId) {
+        String chatRoomId = chatRoom.getChatRoomId();
+        String[] roomIds = chatRoomId.split(CHATROOM_DELIMITER);
+
+        ChatMessage lastMessage = chatMessageRepository
+                .findFirstByChatRoomIdOrderByCreatedDateTimeDesc(chatRoomId)
+                .orElse(null);
+
+        Member otherMember = Arrays.stream(roomIds)
+                .filter(id -> !id.equals(githubId))
+                .map(this::validateMemberByGitHubId)
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_CHAT_ROOM));
+
+        return new ChatRoomRespDto(
+                otherMember.getLogin(),
+                otherMember.getAvatarUrl(),
+                lastMessage.getMessage(),
+                lastMessage.getCreatedDateTime()
+        );
     }
 }
