@@ -1,6 +1,7 @@
 package com.twoclock.gitconnect.domain.chat.web;
 
 import com.twoclock.gitconnect.domain.chat.dto.ChatMessageRespDto;
+import com.twoclock.gitconnect.domain.chat.dto.ChatRoomRespDto;
 import com.twoclock.gitconnect.domain.chat.service.ChatRoomService;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import com.twoclock.gitconnect.global.security.UserDetailsImpl;
@@ -35,6 +36,15 @@ public class ChatRoomController {
         String githubId = userDetails.getUsername();
         chatRoomService.deleteChatRoom(githubId, chatRoomId);
         return RestResponse.OK();
+    }
+
+    @GetMapping
+    public RestResponse getChatRooms(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        String githubId = userDetails.getUsername();
+        List<ChatRoomRespDto> responseDto = chatRoomService.getChatRooms(githubId);
+        return new RestResponse(responseDto);
     }
 
     @GetMapping("/{chatRoomId}/messages")
