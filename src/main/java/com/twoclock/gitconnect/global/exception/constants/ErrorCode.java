@@ -35,7 +35,6 @@ public enum ErrorCode {
     ALREADY_EXIST_CHAT_ROOM(HttpStatus.CONFLICT, "CH-001", "이미 존재하는 채팅방입니다."),
     NOT_FOUND_CHAT_ROOM(HttpStatus.NOT_FOUND, "CH-002", "찾을 수 없는 채팅방입니다."),
     NO_ACCESS_CHAT_ROOM(HttpStatus.BAD_REQUEST, "CH-003", "접근할 수 없는 채팅방입니다."),
-    NOT_FOUND_FIRST_CHAT_MESSAGE(HttpStatus.NOT_FOUND, "CH-004", "첫번째 채팅 메세지를 찾을 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;
