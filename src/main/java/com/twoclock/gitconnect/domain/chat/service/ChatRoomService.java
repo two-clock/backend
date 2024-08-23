@@ -54,7 +54,7 @@ public class ChatRoomService {
 
     @Transactional(readOnly = true)
     public List<ChatMessageRespDto> chatRoomMessages(String githubId, String chatRoomId, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdDateTime");
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.ASC, "createdDateTime");
 
         Member member = validateMemberByGitHubId(githubId);
         ChatRoom chatRoom = validateChatRoomById(chatRoomId);
