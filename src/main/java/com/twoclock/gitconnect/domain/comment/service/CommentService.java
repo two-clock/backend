@@ -23,9 +23,9 @@ public class CommentService {
     private final BoardRepository boardRepository;
 
     @Transactional
-    public void saveComment(CommentRegistReqDto dto, String githubId) {
+    public void saveComment(CommentRegistReqDto dto, String githubId, Long boardId) {
         filteringBadWord(dto.content());
-        Board board = validateBoard(dto.boardId());
+        Board board = validateBoard(boardId);
         Member member = validateMember(githubId);
 
         Comment comment = Comment.builder()
