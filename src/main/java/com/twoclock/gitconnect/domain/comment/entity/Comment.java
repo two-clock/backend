@@ -8,12 +8,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@DynamicUpdate
 @SQLDelete(sql = "UPDATE comment SET is_view = false WHERE id = ?")
 @Where(clause = "is_view = true")
 public class Comment extends BaseEntity {
@@ -37,14 +39,13 @@ public class Comment extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private boolean isView = true;
+    private final boolean isView = true;
 
     @Builder
-    public Comment(Board board, Member member, String nickname, String content, boolean isView) {
+    public Comment(Board board, Member member, String nickname, String content) {
         this.board = board;
         this.member = member;
         this.nickname = nickname;
         this.content = content;
-        this.isView = isView;
     }
 }
