@@ -2,7 +2,7 @@ package com.twoclock.gitconnect.domain.comment.service;
 
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
-import com.twoclock.gitconnect.domain.comment.dto.CommentRegReqDto;
+import com.twoclock.gitconnect.domain.comment.dto.CommentRegistReqDto;
 import com.twoclock.gitconnect.domain.comment.entity.Comment;
 import com.twoclock.gitconnect.domain.comment.repository.CommentRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
@@ -23,7 +23,7 @@ public class CommentService {
     private final BoardRepository boardRepository;
 
     @Transactional
-    public void saveComment(CommentRegReqDto dto, String githubId) {
+    public void saveComment(CommentRegistReqDto dto, String githubId) {
         filteringBadWord(dto.content());
         Board board = validateBoard(dto.boardId());
         Member member = validateMember(githubId);

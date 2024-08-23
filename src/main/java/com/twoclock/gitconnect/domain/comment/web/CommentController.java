@@ -1,6 +1,6 @@
 package com.twoclock.gitconnect.domain.comment.web;
 
-import com.twoclock.gitconnect.domain.comment.dto.CommentRegReqDto;
+import com.twoclock.gitconnect.domain.comment.dto.CommentRegistReqDto;
 import com.twoclock.gitconnect.domain.comment.service.CommentService;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.validation.Valid;
@@ -20,7 +20,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public RestResponse saveComment(@RequestBody @Valid CommentRegReqDto dto,
+    public RestResponse saveComment(@RequestBody @Valid CommentRegistReqDto dto,
                                     @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();
         commentService.saveComment(dto, githubId);
