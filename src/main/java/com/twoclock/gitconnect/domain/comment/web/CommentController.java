@@ -17,7 +17,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/boards/{boardId}/comment")
+    @PostMapping("/boards/{boardId}/comments")
     public RestResponse saveComment(@RequestBody @Valid CommentRegistReqDto dto,
                                     @PathVariable("boardId") Long boardId,
                                     @AuthenticationPrincipal UserDetails userDetails) {
@@ -26,13 +26,12 @@ public class CommentController {
         return RestResponse.OK();
     }
 
-    @PutMapping("/boards/{boardId}/comment/{commentId}")
+    @PutMapping("/comments/{commentId}")
     public RestResponse modifyComment(@RequestBody @Valid CommentModifyReqDto dto,
-                                      @PathVariable("boardId") Long boardId,
                                       @PathVariable("commentId") Long commentId,
                                       @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();
-        commentService.modifyComment(dto, githubId, boardId, commentId);
+        commentService.modifyComment(dto, githubId, commentId);
         return RestResponse.OK();
     }
 }

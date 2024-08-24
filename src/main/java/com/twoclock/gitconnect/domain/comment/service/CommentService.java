@@ -39,9 +39,8 @@ public class CommentService {
     }
 
     @Transactional
-    public void modifyComment(CommentModifyReqDto dto, String githubId, Long boardId, Long commentId) {
+    public void modifyComment(CommentModifyReqDto dto, String githubId, Long commentId) {
         filteringBadWord(dto.content());
-        Board board = validateBoard(boardId);
         Member member = validateMember(githubId);
         Comment comment = validateComment(commentId);
 
