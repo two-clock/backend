@@ -1,5 +1,6 @@
 package com.twoclock.gitconnect.domain.comment.web;
 
+import com.twoclock.gitconnect.domain.comment.dto.CommentModifyReqDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentRegistReqDto;
 import com.twoclock.gitconnect.domain.comment.service.CommentService;
 import com.twoclock.gitconnect.global.model.RestResponse;
@@ -16,12 +17,21 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/boards/{boardId}/comment")
+    @PostMapping("/boards/{boardId}/comments")
     public RestResponse saveComment(@RequestBody @Valid CommentRegistReqDto dto,
                                     @PathVariable("boardId") Long boardId,
                                     @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();
         commentService.saveComment(dto, githubId, boardId);
+        return RestResponse.OK();
+    }
+
+    @PutMapping("/comments/{commentId}")
+    public RestResponse modifyComment(@RequestBody @Valid CommentModifyReqDto dto,
+                                      @PathVariable("commentId") Long commentId,
+                                      @AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        commentService.modifyComment(dto, githubId, commentId);
         return RestResponse.OK();
     }
 }

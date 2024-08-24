@@ -32,6 +32,8 @@ public enum ErrorCode {
     DUPLICATED_LIKE(HttpStatus.BAD_REQUEST, "L-001", "이미 좋아요를 누른 게시글입니다."),
     NOT_FOUND_LIKE(HttpStatus.BAD_REQUEST, "L-002", "좋아요를 누른 게시글을 찾을 수 없습니다."),
 
+    NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "CM-001", "찾을 수 없는 댓글입니다."),
+
     BAD_WORD(HttpStatus.BAD_REQUEST, "W-001", "금지어가 포함되어 있습니다."),
 
     ALREADY_EXIST_CHAT_ROOM(HttpStatus.CONFLICT, "CH-001", "이미 존재하는 채팅방입니다."),

@@ -2,6 +2,7 @@ package com.twoclock.gitconnect.domain.comment.service;
 
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
+import com.twoclock.gitconnect.domain.comment.dto.CommentModifyReqDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentRegistReqDto;
 import com.twoclock.gitconnect.domain.comment.entity.Comment;
 import com.twoclock.gitconnect.domain.comment.repository.CommentRepository;
@@ -37,6 +38,15 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
+    @Transactional
+    public void modifyComment(CommentModifyReqDto dto, String githubId, Long commentId) {
+        filteringBadWord(dto.content());
+        Member member = validateMember(githubId);
+        Comment comment = validateComment(commentId);
+
+        comment.update(dto.content());
+    }
+
     private Board validateBoard(Long boardId) {
         return boardRepository.findById(boardId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
@@ -46,6 +56,12 @@ public class CommentService {
     private Member validateMember(String githubId) {
         return memberRepository.findByGitHubId(githubId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+        );
+    }
+
+    private Comment validateComment(Long commentId) {
+        return commentRepository.findById(commentId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_COMMENT)
         );
     }
 
