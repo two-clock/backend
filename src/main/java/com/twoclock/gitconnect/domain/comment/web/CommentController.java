@@ -34,4 +34,12 @@ public class CommentController {
         commentService.modifyComment(dto, githubId, commentId);
         return RestResponse.OK();
     }
+
+    @DeleteMapping("/comments/{commentId}")
+    public RestResponse deleteComment(@PathVariable("commentId") Long commentId,
+                                      @AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        commentService.deleteComment(githubId, commentId);
+        return RestResponse.OK();
+    }
 }

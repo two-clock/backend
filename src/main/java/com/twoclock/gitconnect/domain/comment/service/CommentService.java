@@ -47,6 +47,14 @@ public class CommentService {
         comment.update(dto.content());
     }
 
+    @Transactional
+    public void deleteComment(String githubId, Long commentId) {
+        Member member = validateMember(githubId);
+        Comment comment = validateComment(commentId);
+
+        commentRepository.delete(comment);
+    }
+
     private Board validateBoard(Long boardId) {
         return boardRepository.findById(boardId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
