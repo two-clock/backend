@@ -27,11 +27,8 @@ public class BoardService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, Long userId) {
-
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
-        );
+    public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId) {
+        Member member = validateMember(githubId);
         Category code = Category.of(boardSaveReqDto.category());
 
         Board board = Board.builder()
@@ -46,14 +43,9 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long userId) {
-
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
-        );
-        Board board = boardRepository.findById(boardUpdateReqDto.id()).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
-        );
+    public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long boardId, String githubId) {
+        Member member = validateMember(githubId);
+        Board board = validateBoard(boardId);
         board.checkUserId(member.getId());
         board.updateBoard(boardUpdateReqDto.title(), boardUpdateReqDto.content());
 
@@ -72,7 +64,6 @@ public class BoardService {
 
         // 페이지 요청 객체 생성
         PageRequest pageRequest = searchRequestDto.toPageRequest();
-
         Page<SearchResponseDto> boardList = boardRepository.searchBoardList(searchRequestDto, pageRequest);
 
         return boardList;
@@ -80,15 +71,23 @@ public class BoardService {
     }
 
     @Transactional
-    public void deleteBoard(Long boardKey, Long userId) {
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
-        );
-        Board board = boardRepository.findById(boardKey).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
-        );
+    public void deleteBoard(Long boardId, String githubId) {
+        Member member = validateMember(githubId);
+        Board board = validateBoard(boardId);
         board.checkUserId(member.getId());
         boardRepository.delete(board);
 
+    }
+
+    private Member validateMember(String githubId) {
+        return memberRepository.findByGitHubId(githubId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+        );
+    }
+
+    private Board validateBoard(Long boardId) {
+        return boardRepository.findById(boardId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
+        );
     }
 }

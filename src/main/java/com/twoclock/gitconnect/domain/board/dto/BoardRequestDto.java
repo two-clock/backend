@@ -19,8 +19,6 @@ public class BoardRequestDto {
     }
 
     public record BoardModifyReqDto(
-            @NotNull(message = "게시판 키가 존재하지 않습니다.")
-            Long id,
             @Size(max = 50, message = "제목은 50자 이내로 작성해주세요.")
             @NotBlank(message = "제목을 입력해주세요.")
             String title,

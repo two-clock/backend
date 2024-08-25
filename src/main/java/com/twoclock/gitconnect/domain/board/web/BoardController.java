@@ -10,6 +10,8 @@ import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -20,44 +22,35 @@ public class BoardController {
     private final BoardService boardService;
 
     @PostMapping
-    public RestResponse saveBoard(@RequestBody @Valid BoardSaveReqDto boardSaveReqDto) {
-        // TODO : 로그인 유저인지 검증 필요
-        Long userId = 1L;
-
-        BoardRespDto boardRespDto = boardService.saveBoard(boardSaveReqDto, userId);
-
+    public RestResponse saveBoard(@RequestBody @Valid BoardSaveReqDto boardSaveReqDto,
+                                  @AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        BoardRespDto boardRespDto = boardService.saveBoard(boardSaveReqDto, githubId);
         return RestResponse.OK();
-//        return new RestResponse(boardRespDto);
     }
 
-    @PutMapping
-    public RestResponse updateBoard(@RequestBody @Valid BoardModifyReqDto boardUpdateReqDto) {
-        // TODO : 로그인 유저인지 검증 필요
-        Long userId = 1L;
-
-        BoardRespDto boardRespDto = boardService.modifyBoard(boardUpdateReqDto, userId);
-
+    @PutMapping("/{boardId}")
+    public RestResponse updateBoard(@RequestBody @Valid BoardModifyReqDto boardUpdateReqDto,
+                                    @PathVariable("boardId") Long boardId,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        BoardRespDto boardRespDto = boardService.modifyBoard(boardUpdateReqDto, boardId, githubId);
         return RestResponse.OK();
-//        return new RestResponse(boardRespDto);
     }
 
 
     @GetMapping
     public RestResponse getBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto) {
-
         Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto);
-
         return new RestResponse(boardRespDto);
 
     }
 
-    @DeleteMapping("/{boardKey}")
-    public RestResponse deleteBoard(@PathVariable("boardKey") Long boardKey) {
-        // TODO : 로그인 유저인지 검증 필요
-        Long userId = 1L;
-
-        boardService.deleteBoard(boardKey, userId);
-
+    @DeleteMapping("/{boardId}")
+    public RestResponse deleteBoard(@PathVariable("boardId") Long boardId,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        boardService.deleteBoard(boardId, githubId);
         return RestResponse.OK();
 
     }
