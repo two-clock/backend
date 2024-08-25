@@ -15,7 +15,10 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
+import static com.querydsl.core.types.ExpressionUtils.count;
 import static com.twoclock.gitconnect.domain.board.entity.QBoard.board;
+import static com.twoclock.gitconnect.domain.comment.entity.QComment.comment;
+import static com.twoclock.gitconnect.domain.like.entity.QLikes.likes;
 import static com.twoclock.gitconnect.domain.member.entity.QMember.member;
 
 public class BoardRepositoryImpl implements CustomBoardRepository {
@@ -35,11 +38,16 @@ public class BoardRepositoryImpl implements CustomBoardRepository {
                         board.content,
                         board.nickname,
                         board.category.stringValue(),
-                        new QMemberLoginRespDto(board.member.login, board.member.gitHubId, board.member.avatarUrl, board.member.name)
+                        new QMemberLoginRespDto(board.member.login, board.member.gitHubId, board.member.avatarUrl, board.member.name),
+                        comment.id.countDistinct(),
+                        likes.id.countDistinct()
                 ))
                 .from(board)
                 .join(board.member, member)
+                .leftJoin(comment).on(board.id.eq(comment.board.id))
+                .leftJoin(likes).on(board.id.eq(likes.board.id))
                 .where(searchQueryBuilder(searchRequestDto))
+                .groupBy(board.id)
                 .orderBy(board.createdDateTime.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
