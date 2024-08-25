@@ -12,6 +12,7 @@ import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ public class BoardService {
 
     @Transactional
     public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId) {
+        filteringBadWord(boardSaveReqDto.content());
         Member member = validateMember(githubId);
         Category code = Category.of(boardSaveReqDto.category());
 
@@ -44,6 +46,7 @@ public class BoardService {
 
     @Transactional
     public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long boardId, String githubId) {
+        filteringBadWord(boardUpdateReqDto.content());
         Member member = validateMember(githubId);
         Board board = validateBoard(boardId);
         board.checkUserId(member.getId());
@@ -51,7 +54,6 @@ public class BoardService {
 
         return new BoardRespDto(board);
     }
-
 
     @Transactional(readOnly = true)
     public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto) {
@@ -67,7 +69,6 @@ public class BoardService {
         Page<SearchResponseDto> boardList = boardRepository.searchBoardList(searchRequestDto, pageRequest);
 
         return boardList;
-
     }
 
     @Transactional
@@ -89,5 +90,12 @@ public class BoardService {
         return boardRepository.findById(boardId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
         );
+    }
+
+    private void filteringBadWord(String content) {
+        BadWordFiltering filtering = new BadWordFiltering();
+        if (filtering.check(content)) {
+            throw new CustomException(ErrorCode.BAD_WORD);
+        }
     }
 }
