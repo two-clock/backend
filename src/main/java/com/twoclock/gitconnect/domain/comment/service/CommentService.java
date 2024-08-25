@@ -2,6 +2,7 @@ package com.twoclock.gitconnect.domain.comment.service;
 
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
+import com.twoclock.gitconnect.domain.comment.dto.CommentListRespDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentModifyReqDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentRegistReqDto;
 import com.twoclock.gitconnect.domain.comment.entity.Comment;
@@ -14,6 +15,8 @@ import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -53,6 +56,15 @@ public class CommentService {
         Comment comment = validateComment(commentId);
 
         commentRepository.delete(comment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentListRespDto> getComments(Long boardId) {
+        Board board = validateBoard(boardId);
+        List<Comment> comments = commentRepository.findAllByBoard(board);
+        return comments.stream()
+                .map(CommentListRespDto::new)
+                .toList();
     }
 
     private Board validateBoard(Long boardId) {
