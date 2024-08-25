@@ -1,5 +1,6 @@
 package com.twoclock.gitconnect.domain.comment.web;
 
+import com.twoclock.gitconnect.domain.comment.dto.CommentListRespDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentModifyReqDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentRegistReqDto;
 import com.twoclock.gitconnect.domain.comment.service.CommentService;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
@@ -41,5 +44,11 @@ public class CommentController {
         String githubId = userDetails.getUsername();
         commentService.deleteComment(githubId, commentId);
         return RestResponse.OK();
+    }
+
+    @GetMapping("/boards/{boardId}/comments")
+    public RestResponse getComments(@PathVariable("boardId") Long boardId) {
+        List<CommentListRespDto> result = commentService.getComments(boardId);
+        return new RestResponse(result);
     }
 }
