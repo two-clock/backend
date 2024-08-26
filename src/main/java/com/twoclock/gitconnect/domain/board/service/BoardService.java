@@ -1,5 +1,6 @@
 package com.twoclock.gitconnect.domain.board.service;
 
+import com.twoclock.gitconnect.domain.board.dto.BoardCacheDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
@@ -16,22 +17,28 @@ import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Service
 public class BoardService {
 
     private final BoardRepository boardRepository;
-
     private final MemberRepository memberRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional
     public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId) {
+        Category code = Category.of(boardSaveReqDto.category());
+        String key = "board:" + githubId + ":" + code;
+
+        validateManyRequestBoard(key);
         filteringBadWord(boardSaveReqDto.content());
         Member member = validateMember(githubId);
-        Category code = Category.of(boardSaveReqDto.category());
 
         Board board = Board.builder()
                 .title(boardSaveReqDto.title())
@@ -41,6 +48,7 @@ public class BoardService {
                 .member(member)
                 .build();
         Board boardPS = boardRepository.save(board);
+        redisTemplate.opsForValue().set(key, new BoardCacheDto(boardPS));
         return new BoardRespDto(boardPS);
     }
 
@@ -90,6 +98,17 @@ public class BoardService {
         return boardRepository.findById(boardId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
         );
+    }
+
+    private void validateManyRequestBoard(String key) {
+        BoardCacheDto boardCacheDto = (BoardCacheDto) redisTemplate.opsForValue().get(key);
+        if (boardCacheDto != null){
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime registerTime = LocalDateTime.parse(boardCacheDto.createdAt());
+            if (now.minusMinutes(5).isBefore(registerTime)) {
+                throw new CustomException(ErrorCode.MANY_SAVE_REQUEST_BOARD);
+            }
+        }
     }
 
     private void filteringBadWord(String content) {
