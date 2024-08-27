@@ -38,12 +38,18 @@ public class BoardController {
         return RestResponse.OK();
     }
 
-
     @GetMapping
     public RestResponse getBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto) {
         Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto);
         return new RestResponse(boardRespDto);
+    }
 
+    @GetMapping("/report")
+    public RestResponse getReportBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        Page<SearchResponseDto> boardRespDto = boardService.getReportBoardList(searchRequestDto, githubId);
+        return new RestResponse(boardRespDto);
     }
 
     @DeleteMapping("/{boardId}")

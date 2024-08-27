@@ -65,18 +65,17 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto) {
-
-        // TODO: 카테고리 타입 확인
-
-        // TODO: 신고 게시판 정책 추가
-
-        //
-
-        // 페이지 요청 객체 생성
         PageRequest pageRequest = searchRequestDto.toPageRequest();
-        Page<SearchResponseDto> boardList = boardRepository.searchBoardList(searchRequestDto, pageRequest);
+        return  boardRepository.searchBoardList(searchRequestDto, pageRequest);
+    }
 
-        return boardList;
+    @Transactional(readOnly = true)
+    public Page<SearchResponseDto> getReportBoardList(SearchRequestDto searchRequestDto, String githubId) {
+        Member member = validateMember(githubId);
+        String role = member.getRole().toString();
+        searchRequestDto.changeForReportSearch(Category.BD3.toString(), githubId, role);
+        PageRequest pageRequest = searchRequestDto.toPageRequest();
+        return boardRepository.searchBoardList(searchRequestDto, pageRequest);
     }
 
     @Transactional
