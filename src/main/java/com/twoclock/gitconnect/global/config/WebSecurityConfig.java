@@ -76,7 +76,7 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests((requests) -> requests
                         .requestMatchers(HttpMethod.GET, GET_PERMIT_STRINGS).permitAll()
                         .requestMatchers(HttpMethod.POST, POST_PERMIT_STRINGS).permitAll()
-                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/ws/**", "/actuator/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
