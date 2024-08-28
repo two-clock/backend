@@ -37,7 +37,7 @@ public class BoardService {
         Category code = Category.of(boardSaveReqDto.category());
         String key = "board:" + githubId + ":" + code;
 
-//        validateManyRequestBoard(key);
+        validateManyRequestBoard(key);
         filteringBadWord(boardSaveReqDto.content());
         Member member = validateMember(githubId);
 
