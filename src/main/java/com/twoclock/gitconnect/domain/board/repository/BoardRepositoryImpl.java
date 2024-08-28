@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.querydsl.core.types.ExpressionUtils.count;
 import static com.twoclock.gitconnect.domain.board.entity.QBoard.board;
@@ -63,8 +64,8 @@ public class BoardRepositoryImpl implements CustomBoardRepository {
     private BooleanBuilder searchQueryBuilder(SearchRequestDto searchRequestDto) {
         BooleanBuilder builder = new BooleanBuilder();
         Category category = Category.of(searchRequestDto.category());
-        Role role = Role.of(searchRequestDto.role());
-        if(role == null) role = Role.ROLE_USER;
+        String roleStr = Optional.ofNullable(searchRequestDto.role()).orElse("ROLE_USER");
+        Role role = Role.of(roleStr);
 
         // 게시판 카테고리 설정
         builder.and(board.category.eq(category));
@@ -90,6 +91,7 @@ public class BoardRepositoryImpl implements CustomBoardRepository {
                     break;
             }
         }
+        // 신고 게시판인 경우 추가 조건처리
         if(category.equals(Category.BD3) && !Role.ROLE_ADMIN.equals(role)) {
             builder.and(board.member.gitHubId.eq(searchRequestDto.githubId()));
         }

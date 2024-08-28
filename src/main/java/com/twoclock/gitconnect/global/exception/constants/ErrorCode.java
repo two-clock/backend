@@ -31,6 +31,7 @@ public enum ErrorCode {
     FAIL_MODIFY_BOARD(HttpStatus.INTERNAL_SERVER_ERROR, "B-002", "게시글 수정에 실패하였습니다."),
     NOT_FOUND_BOARD(HttpStatus.NOT_FOUND, "B-003", "해당 게시판을 찾을 수 없습니다."),
     MANY_SAVE_REQUEST_BOARD(HttpStatus.TOO_MANY_REQUESTS, "B-004", "게시글은 5분에 1번 작성할 수 있습니다."),
+    NOT_USING_REPORT_BOARD(HttpStatus.FORBIDDEN, "B-005", "신고 게시판은 로그인 이후 이용하실 수 있습니다."),
 
     DUPLICATED_LIKE(HttpStatus.BAD_REQUEST, "L-001", "이미 좋아요를 누른 게시글입니다."),
     NOT_FOUND_LIKE(HttpStatus.BAD_REQUEST, "L-002", "좋아요를 누른 게시글을 찾을 수 없습니다."),

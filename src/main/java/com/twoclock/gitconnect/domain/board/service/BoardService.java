@@ -10,6 +10,7 @@ import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
+import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
@@ -36,7 +37,7 @@ public class BoardService {
         Category code = Category.of(boardSaveReqDto.category());
         String key = "board:" + githubId + ":" + code;
 
-        validateManyRequestBoard(key);
+//        validateManyRequestBoard(key);
         filteringBadWord(boardSaveReqDto.content());
         Member member = validateMember(githubId);
 
@@ -64,18 +65,10 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto) {
+    public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto, String githubId) {
+        searchRequestDto = checkGetReportBoards(searchRequestDto, githubId);
         PageRequest pageRequest = searchRequestDto.toPageRequest();
         return  boardRepository.searchBoardList(searchRequestDto, pageRequest);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<SearchResponseDto> getReportBoardList(SearchRequestDto searchRequestDto, String githubId) {
-        Member member = validateMember(githubId);
-        String role = member.getRole().toString();
-        searchRequestDto.changeForReportSearch(Category.BD3.toString(), githubId, role);
-        PageRequest pageRequest = searchRequestDto.toPageRequest();
-        return boardRepository.searchBoardList(searchRequestDto, pageRequest);
     }
 
     @Transactional
@@ -109,6 +102,19 @@ public class BoardService {
             }
         }
     }
+
+    private SearchRequestDto checkGetReportBoards(SearchRequestDto searchRequestDto, String githubId) {
+        if (Category.BD3.equals(Category.of(searchRequestDto.category()))) {
+            if (githubId == null || githubId.isEmpty()) {
+                throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
+            }
+            Member member = validateMember(githubId);
+            String role = member.getRole().toString();
+            return searchRequestDto.changeUseMember(githubId, role);
+        }
+        return searchRequestDto;
+    }
+
 
     private void filteringBadWord(String content) {
         BadWordFiltering filtering = new BadWordFiltering();

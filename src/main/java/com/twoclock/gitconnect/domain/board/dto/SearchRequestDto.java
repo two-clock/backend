@@ -21,8 +21,8 @@ public record SearchRequestDto(
         return PageRequest.of(pageNumber, pageSize);
     }
 
-    public void changeForReportSearch(String category, String githubId, String role) {
-        new SearchRequestDto(githubId, role, word, type, category, page, size);
+    public SearchRequestDto changeUseMember(String githubId, String role) {
+        return new SearchRequestDto(githubId, role, word, type, category, page, size);
     }
 
 }
