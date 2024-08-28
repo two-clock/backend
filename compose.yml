@@ -29,3 +29,27 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=1234
     volumes:
       - ./mongodb-data:/data
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    restart: always
+    ports:
+      - 9090:9090
+    command:
+      - '--web.enable-lifecycle'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+      - ./prometheus:/etc/prometheus
+    extra_hosts:
+      host.docker.internal: host-gateway
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+      - ./grafana-data/provisioning/:/etc/grafana/provisioning/
