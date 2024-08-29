@@ -8,9 +8,9 @@ import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
+import com.twoclock.gitconnect.domain.board.repository.BoardCacheRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
-import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
@@ -30,7 +30,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final BoardCacheRepository boardCacheRepository;
 
     @Transactional
     public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId) {
@@ -49,7 +49,7 @@ public class BoardService {
                 .member(member)
                 .build();
         Board boardPS = boardRepository.save(board);
-        redisTemplate.opsForValue().set(key, new BoardCacheDto(boardPS));
+        boardCacheRepository.setBoardCache(key, new BoardCacheDto(boardPS));
         return new BoardRespDto(boardPS);
     }
 
@@ -93,7 +93,7 @@ public class BoardService {
     }
 
     private void validateManyRequestBoard(String key) {
-        BoardCacheDto boardCacheDto = (BoardCacheDto) redisTemplate.opsForValue().get(key);
+        BoardCacheDto boardCacheDto = boardCacheRepository.getBoardCache(key);
         if (boardCacheDto != null){
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime registerTime = LocalDateTime.parse(boardCacheDto.createdAt());

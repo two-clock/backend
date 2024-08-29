@@ -43,9 +43,7 @@ public class BoardController {
     @GetMapping
     public RestResponse getBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto,
                                      @AuthenticationPrincipal UserDetails userDetails) {
-        String githubId = Optional.ofNullable(userDetails)
-                .map(UserDetails::getUsername)
-                .orElse("");
+        String githubId = userDetails == null ? null : userDetails.getUsername();
         Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto, githubId);
         return new RestResponse(boardRespDto);
     }
