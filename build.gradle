@@ -73,6 +73,10 @@ dependencies {
 
     // 욕설 필터 라이브러리
     implementation 'io.github.vaneproject:badwordfiltering:1.0.0'
+
+    // 모니터링
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {

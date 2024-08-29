@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'gitconnect-monitor'
+  query_log_file: query_log_file.log
+
+scrape_configs:
+  - job_name: "spring-actuator"
+    metrics_path: "/actuator/prometheus"
+    scrape_interval: 1s
+    static_configs:
+      - targets: [ "host.docker.internal:8090" ]

@@ -44,3 +44,5 @@ application-local.yml
 ### Docker ###
 mysql-data/
 mongodb-data/
+grafana-data/
+prometheus/*.log
