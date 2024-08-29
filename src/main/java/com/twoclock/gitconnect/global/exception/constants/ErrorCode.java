@@ -13,6 +13,8 @@ public enum ErrorCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "U-001", "잘못된 요청입니다."),
     NOT_ACCEPTABLE(HttpStatus.NOT_ACCEPTABLE, "U-002", "요청을 수락할 수 없습니다."),
 
+    NOT_FOUND_ROLE(HttpStatus.NOT_FOUND, "R-001", "찾을 수 없는 권한입니다."),
+
     JWT_ERROR(HttpStatus.UNAUTHORIZED, "JWT-001", "JWT 토큰 에러가 발생했습니다."),
     JWT_REFRESH_TOKEN_ERROR(HttpStatus.FORBIDDEN, "JWT-002", "JWT 리프레쉬 토큰 에러가 발생했습니다."),
     JWT_BLACKLIST(HttpStatus.FORBIDDEN, "JWT-003", "블랙 리스트에 저장된 JWT 토큰입니다."),
@@ -28,6 +30,8 @@ public enum ErrorCode {
     FAIL_SAVE_BOARD(HttpStatus.INTERNAL_SERVER_ERROR, "B-001", "게시글 저장에 실패하였습니다."),
     FAIL_MODIFY_BOARD(HttpStatus.INTERNAL_SERVER_ERROR, "B-002", "게시글 수정에 실패하였습니다."),
     NOT_FOUND_BOARD(HttpStatus.NOT_FOUND, "B-003", "해당 게시판을 찾을 수 없습니다."),
+    MANY_SAVE_REQUEST_BOARD(HttpStatus.TOO_MANY_REQUESTS, "B-004", "게시글은 5분에 1번 작성할 수 있습니다."),
+    NOT_USING_REPORT_BOARD(HttpStatus.FORBIDDEN, "B-005", "신고 게시판은 로그인 이후 이용하실 수 있습니다."),
 
     DUPLICATED_LIKE(HttpStatus.BAD_REQUEST, "L-001", "이미 좋아요를 누른 게시글입니다."),
     NOT_FOUND_LIKE(HttpStatus.BAD_REQUEST, "L-002", "좋아요를 누른 게시글을 찾을 수 없습니다."),

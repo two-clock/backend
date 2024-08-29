@@ -8,12 +8,15 @@ import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.member.dto.QMemberLoginRespDto;
+import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.querydsl.core.types.ExpressionUtils.count;
 import static com.twoclock.gitconnect.domain.board.entity.QBoard.board;
@@ -60,9 +63,12 @@ public class BoardRepositoryImpl implements CustomBoardRepository {
 
     private BooleanBuilder searchQueryBuilder(SearchRequestDto searchRequestDto) {
         BooleanBuilder builder = new BooleanBuilder();
+        Category category = Category.of(searchRequestDto.category());
+        String roleStr = Optional.ofNullable(searchRequestDto.role()).orElse("ROLE_USER");
+        Role role = Role.of(roleStr);
 
         // 게시판 카테고리 설정
-        builder.and(board.category.eq(Category.of(searchRequestDto.category())));
+        builder.and(board.category.eq(category));
 
         // 검색어가 존재하는 경우
         if (searchRequestDto.word() != null) {
@@ -84,6 +90,10 @@ public class BoardRepositoryImpl implements CustomBoardRepository {
                     );
                     break;
             }
+        }
+        // 신고 게시판인 경우 추가 조건처리
+        if(category.equals(Category.BD3) && !Role.ROLE_ADMIN.equals(role)) {
+            builder.and(board.member.gitHubId.eq(searchRequestDto.githubId()));
         }
 
         return builder;

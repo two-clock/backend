@@ -14,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/boards")
 @RestController
@@ -38,12 +40,12 @@ public class BoardController {
         return RestResponse.OK();
     }
 
-
     @GetMapping
-    public RestResponse getBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto) {
-        Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto);
+    public RestResponse getBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto,
+                                     @AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails == null ? null : userDetails.getUsername();
+        Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto, githubId);
         return new RestResponse(boardRespDto);
-
     }
 
     @DeleteMapping("/{boardId}")
