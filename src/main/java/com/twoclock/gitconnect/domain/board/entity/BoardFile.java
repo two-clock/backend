@@ -24,20 +24,13 @@ public class BoardFile extends BaseEntity {
     private String originalName;
 
     @Column(nullable = false, unique = true)
-    private String uuid;
+    private String fileUrl;
 
-    @Column(nullable = false)
-    private String savePath;
-
-    @Column(nullable = false)
-    private String extension;
 
     @Builder
-    public BoardFile(Board board, String originalName, String uuid, String savePath, String extension) {
+    public BoardFile(Board board, String originalName, String fileUrl) {
         this.board = board;
         this.originalName = originalName;
-        this.uuid = uuid;
-        this.savePath = savePath;
-        this.extension = extension;
+        this.fileUrl = fileUrl;
     }
 }
