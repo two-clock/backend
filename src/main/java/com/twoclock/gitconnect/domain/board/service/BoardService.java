@@ -1,6 +1,5 @@
 package com.twoclock.gitconnect.domain.board.service;
 
-import com.amazonaws.util.IOUtils;
 import com.twoclock.gitconnect.domain.board.dto.BoardCacheDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
@@ -8,16 +7,16 @@ import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.entity.Board;
+import com.twoclock.gitconnect.domain.board.entity.BoardFile;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardCacheRepository;
+import com.twoclock.gitconnect.domain.board.repository.BoardFileRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
-import com.twoclock.gitconnect.global.model.FileDto;
 import com.twoclock.gitconnect.global.s3.S3Service;
-import com.twoclock.gitconnect.global.util.FileUtil;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,9 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +37,13 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final BoardCacheRepository boardCacheRepository;
+    private final BoardFileRepository boardFileRepository;
     private final S3Service s3Service;
+
+    private static final int MAX_BOARD_IMAGE_SIZE = 5 * 1024 * 1024;
+    private static final List<String> PERMIT_BOARD_IMAGE_TYPE = List.of(
+            "image/jpeg", "image/jpg", "image/png"
+    );
 
     @Transactional
     public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId, MultipartFile[] files)  {
@@ -60,24 +63,7 @@ public class BoardService {
                 .build();
         Board boardPS = boardRepository.save(board);
 
-        // 파일 업로드 구현 구간
-        if (files != null) {
-            if(files.length > 3){
-                throw new CustomException(ErrorCode.MANY_UPLOAD_IMAGES_BOARD);
-            }
-            for (MultipartFile file : files) {
-                FileDto fileDto = FileUtil.convertFileToFileUploadDto(file);
-                System.out.println(fileDto.toString());
-                try {
-                     String fileUrl = s3Service.uploadFile(fileDto.uuid(), file);
-                    System.out.println("file: " +fileUrl);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-
+        if (files != null) boardImageUpload(files, boardPS);
         boardCacheRepository.setBoardCache(key, new BoardCacheDto(boardPS));
         return new BoardRespDto(boardPS);
     }
@@ -144,6 +130,40 @@ public class BoardService {
         return searchRequestDto;
     }
 
+    private void boardImageUpload(MultipartFile[] files, Board board) {
+            if(files.length > 3){
+                throw new CustomException(ErrorCode.MANY_UPLOAD_IMAGES_BOARD);
+            }
+            for (MultipartFile file : files) {
+                String originalName = file.getOriginalFilename();
+                String fileUrl = uploadFileUrl(file);
+                BoardFile boardFile = BoardFile.builder()
+                        .board(board)
+                        .originalName(originalName)
+                        .fileUrl(fileUrl)
+                        .build();
+                boardFileRepository.save(boardFile);
+            }
+    }
+    private String uploadFileUrl(MultipartFile file) {
+        if (file.getSize() > MAX_BOARD_IMAGE_SIZE) {
+            throw new CustomException(ErrorCode.OVER_IMAGE_SIZE_BOARD);
+        }
+
+        if (!PERMIT_BOARD_IMAGE_TYPE.contains(file.getContentType())) {
+            throw new CustomException(ErrorCode.INVALID_IMAGE_TYPE_BOARD);
+        }
+
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        String fileName = file.getOriginalFilename();
+        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        String key = uuid + "." + fileExtension;
+        try {
+            return s3Service.uploadFile(key, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void filteringBadWord(String content) {
         BadWordFiltering filtering = new BadWordFiltering();
