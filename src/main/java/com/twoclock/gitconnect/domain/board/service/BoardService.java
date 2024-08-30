@@ -1,5 +1,6 @@
 package com.twoclock.gitconnect.domain.board.service;
 
+import com.amazonaws.util.IOUtils;
 import com.twoclock.gitconnect.domain.board.dto.BoardCacheDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
@@ -14,14 +15,23 @@ import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.twoclock.gitconnect.global.model.FileDto;
+import com.twoclock.gitconnect.global.s3.S3Service;
+import com.twoclock.gitconnect.global.util.FileUtil;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -30,9 +40,10 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final BoardCacheRepository boardCacheRepository;
+    private final S3Service s3Service;
 
     @Transactional
-    public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId) {
+    public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId, MultipartFile[] files)  {
         Category code = Category.of(boardSaveReqDto.category());
         String key = "board:" + githubId + ":" + code;
 
@@ -48,6 +59,25 @@ public class BoardService {
                 .member(member)
                 .build();
         Board boardPS = boardRepository.save(board);
+
+        // 파일 업로드 구현 구간
+        if (files != null) {
+            if(files.length > 3){
+                throw new CustomException(ErrorCode.MANY_UPLOAD_IMAGES_BOARD);
+            }
+            for (MultipartFile file : files) {
+                FileDto fileDto = FileUtil.convertFileToFileUploadDto(file);
+                System.out.println(fileDto.toString());
+                try {
+                     String fileUrl = s3Service.uploadFile(fileDto.uuid(), file);
+                    System.out.println("file: " +fileUrl);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+
         boardCacheRepository.setBoardCache(key, new BoardCacheDto(boardPS));
         return new BoardRespDto(boardPS);
     }

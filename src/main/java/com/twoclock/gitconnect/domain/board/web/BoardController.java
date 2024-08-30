@@ -10,10 +10,13 @@ import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -23,11 +26,12 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @PostMapping
-    public RestResponse saveBoard(@RequestBody @Valid BoardSaveReqDto boardSaveReqDto,
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public RestResponse saveBoard(@Valid @RequestPart BoardSaveReqDto boardSaveReqDto,
+                                  @RequestPart(required = false) MultipartFile[] files,
                                   @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();
-        BoardRespDto boardRespDto = boardService.saveBoard(boardSaveReqDto, githubId);
+        BoardRespDto boardRespDto = boardService.saveBoard(boardSaveReqDto, githubId, files);
         return RestResponse.OK();
     }
 
