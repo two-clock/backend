@@ -46,7 +46,7 @@ public class BoardService {
     );
 
     @Transactional
-    public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId, MultipartFile[] files)  {
+    public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId, MultipartFile[] files) {
         Category code = Category.of(boardSaveReqDto.category());
         String key = "board:" + githubId + ":" + code;
 
@@ -83,7 +83,7 @@ public class BoardService {
     public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto, String githubId) {
         searchRequestDto = checkGetReportBoards(searchRequestDto, githubId);
         PageRequest pageRequest = searchRequestDto.toPageRequest();
-        return  boardRepository.searchBoardList(searchRequestDto, pageRequest);
+        return boardRepository.searchBoardList(searchRequestDto, pageRequest);
     }
 
     @Transactional
@@ -109,7 +109,7 @@ public class BoardService {
 
     private void validateManyRequestBoard(String key) {
         BoardCacheDto boardCacheDto = boardCacheRepository.getBoardCache(key);
-        if (boardCacheDto != null){
+        if (boardCacheDto != null) {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime registerTime = LocalDateTime.parse(boardCacheDto.createdAt());
             if (now.minusMinutes(5).isBefore(registerTime)) {
@@ -131,20 +131,21 @@ public class BoardService {
     }
 
     private void boardImageUpload(MultipartFile[] files, Board board) {
-            if(files.length > 3){
-                throw new CustomException(ErrorCode.MANY_UPLOAD_IMAGES_BOARD);
-            }
-            for (MultipartFile file : files) {
-                String originalName = file.getOriginalFilename();
-                String fileUrl = uploadFileUrl(file);
-                BoardFile boardFile = BoardFile.builder()
-                        .board(board)
-                        .originalName(originalName)
-                        .fileUrl(fileUrl)
-                        .build();
-                boardFileRepository.save(boardFile);
-            }
+        if (files.length > 3) {
+            throw new CustomException(ErrorCode.MANY_UPLOAD_IMAGES_BOARD);
+        }
+        for (MultipartFile file : files) {
+            String originalName = file.getOriginalFilename();
+            String fileUrl = uploadFileUrl(file);
+            BoardFile boardFile = BoardFile.builder()
+                    .board(board)
+                    .originalName(originalName)
+                    .fileUrl(fileUrl)
+                    .build();
+            boardFileRepository.save(boardFile);
+        }
     }
+
     private String uploadFileUrl(MultipartFile file) {
         if (file.getSize() > MAX_BOARD_IMAGE_SIZE) {
             throw new CustomException(ErrorCode.OVER_IMAGE_SIZE_BOARD);
