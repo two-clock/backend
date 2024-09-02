@@ -32,7 +32,8 @@ public class S3Service {
         return s3Client.getUrl(bucket, keyName).toString();
     }
 
-    public void deleteFile(String keyName) {
+    public void deleteFile(String fileUrl) {
+        String keyName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
         DeleteObjectRequest request = new DeleteObjectRequest(bucket, keyName);
         s3Client.deleteObject(request);
     }

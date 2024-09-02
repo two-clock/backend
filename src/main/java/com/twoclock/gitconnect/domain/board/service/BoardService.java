@@ -69,11 +69,22 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long boardId, String githubId) {
+    public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long boardId, String githubId, MultipartFile[] files) {
         filteringBadWord(boardUpdateReqDto.content());
         Member member = validateMember(githubId);
         Board board = validateBoard(boardId);
         board.checkUserId(member.getId());
+
+        List<BoardFile> boardFiles = boardFileRepository.findByBoardId(boardId);
+        if (!boardFiles.isEmpty()) {
+            boardFiles.stream()
+                    .filter(boardFile -> boardUpdateReqDto.fileOriginImageList().contains(boardFile.getFileUrl()))
+                    .forEach(boardFile -> {
+                        boardFileRepository.delete(boardFile);
+                        s3Service.deleteFile(boardFile.getFileUrl());
+                    });
+        }
+        if (files != null) boardImageUpload(files, board);
         board.updateBoard(boardUpdateReqDto.title(), boardUpdateReqDto.content());
 
         return new BoardRespDto(board);

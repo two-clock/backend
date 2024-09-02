@@ -1,8 +1,9 @@
 package com.twoclock.gitconnect.domain.board.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public class BoardRequestDto {
 
@@ -23,8 +24,8 @@ public class BoardRequestDto {
             @NotBlank(message = "제목을 입력해주세요.")
             String title,
             @NotBlank(message = "내용을 입력해주세요.")
-            String content
-
+            String content,
+            List<String> fileOriginImageList
     ) {
 
     }
