@@ -63,7 +63,7 @@ public class BoardService {
                 .build();
         Board boardPS = boardRepository.save(board);
 
-        if (files != null) boardImageUpload(files, boardPS);
+        if (files.length != 0) boardImageUpload(files, boardPS);
         boardCacheRepository.setBoardCache(key, new BoardCacheDto(boardPS));
         return new BoardRespDto(boardPS);
     }
@@ -76,15 +76,9 @@ public class BoardService {
         board.checkUserId(member.getId());
 
         List<BoardFile> boardFiles = boardFileRepository.findByBoardId(boardId);
-        if (!boardFiles.isEmpty()) {
-            boardFiles.stream()
-                    .filter(boardFile -> boardUpdateReqDto.fileOriginImageList().contains(boardFile.getFileUrl()))
-                    .forEach(boardFile -> {
-                        boardFileRepository.delete(boardFile);
-                        s3Service.deleteFile(boardFile.getFileUrl());
-                    });
-        }
-        if (files != null) boardImageUpload(files, board);
+        deleteBoardImage(boardFiles, boardUpdateReqDto.fileOriginImageList());
+
+        if (files.length != 0) boardImageUpload(files, board);
         board.updateBoard(boardUpdateReqDto.title(), boardUpdateReqDto.content());
 
         return new BoardRespDto(board);
@@ -174,6 +168,17 @@ public class BoardService {
             return s3Service.uploadFile(key, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void deleteBoardImage(List<BoardFile> boardFiles, List<String> boardOriginImageList) {
+        if (!boardFiles.isEmpty()) {
+            boardFiles.stream()
+                    .filter(boardFile -> boardOriginImageList.contains(boardFile.getFileUrl()))
+                    .forEach(boardFile -> {
+                        boardFileRepository.delete(boardFile);
+                        s3Service.deleteFile(boardFile.getFileUrl());
+                    });
         }
     }
 
