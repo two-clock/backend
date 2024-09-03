@@ -77,6 +77,9 @@ dependencies {
     // 모니터링
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // aws s3
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.97'
 }
 
 tasks.named('test') {
