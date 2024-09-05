@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,9 +42,7 @@ public class BoardService {
     private final S3Service s3Service;
 
     private static final int MAX_BOARD_IMAGE_SIZE = 5 * 1024 * 1024;
-    private static final List<String> PERMIT_BOARD_IMAGE_TYPE = List.of(
-            "image/jpeg", "image/jpg", "image/png"
-    );
+    private static final List<String> PERMIT_BOARD_IMAGE_TYPE = List.of("image/jpeg", "image/jpg", "image/png");
 
     @Transactional
     public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId, MultipartFile[] files) {
@@ -63,17 +62,21 @@ public class BoardService {
                 .build();
         Board boardPS = boardRepository.save(board);
 
-        if (files != null) boardImageUpload(files, boardPS);
+        if (files.length != 0) boardImageUpload(files, boardPS);
         boardCacheRepository.setBoardCache(key, new BoardCacheDto(boardPS));
         return new BoardRespDto(boardPS);
     }
 
     @Transactional
-    public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long boardId, String githubId) {
+    public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long boardId, String githubId, MultipartFile[] files) {
         filteringBadWord(boardUpdateReqDto.content());
         Member member = validateMember(githubId);
         Board board = validateBoard(boardId);
         board.checkUserId(member.getId());
+
+        deleteBoardImage(boardId, boardUpdateReqDto.fileOriginImageList());
+
+        if (files.length != 0) boardImageUpload(files, board);
         board.updateBoard(boardUpdateReqDto.title(), boardUpdateReqDto.content());
 
         return new BoardRespDto(board);
@@ -91,20 +94,16 @@ public class BoardService {
         Member member = validateMember(githubId);
         Board board = validateBoard(boardId);
         board.checkUserId(member.getId());
+        deleteBoardImage(boardId, new ArrayList<>());
         boardRepository.delete(board);
-
     }
 
     private Member validateMember(String githubId) {
-        return memberRepository.findByGitHubId(githubId).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
-        );
+        return memberRepository.findByGitHubId(githubId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
     }
 
     private Board validateBoard(Long boardId) {
-        return boardRepository.findById(boardId).orElseThrow(
-                () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
-        );
+        return boardRepository.findById(boardId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BOARD));
     }
 
     private void validateManyRequestBoard(String key) {
@@ -137,11 +136,7 @@ public class BoardService {
         for (MultipartFile file : files) {
             String originalName = file.getOriginalFilename();
             String fileUrl = uploadFileUrl(file);
-            BoardFile boardFile = BoardFile.builder()
-                    .board(board)
-                    .originalName(originalName)
-                    .fileUrl(fileUrl)
-                    .build();
+            BoardFile boardFile = BoardFile.builder().board(board).originalName(originalName).fileUrl(fileUrl).build();
             boardFileRepository.save(boardFile);
         }
     }
@@ -163,6 +158,21 @@ public class BoardService {
             return s3Service.uploadFile(key, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void deleteBoardImage(Long boardId, List<String> boardOriginImageList) {
+        List<BoardFile> boardFiles = boardFileRepository.findByBoardId(boardId);
+        if (!boardFiles.isEmpty()) {
+            if (boardOriginImageList != null && !boardOriginImageList.isEmpty()) {
+                boardFiles = boardFiles.stream()
+                        .filter(boardFile -> !boardOriginImageList.contains(boardFile.getFileUrl()))
+                        .toList();
+            }
+            boardFiles.forEach(boardFile -> {
+                boardFileRepository.delete(boardFile);
+                s3Service.deleteFile(boardFile.getFileUrl());
+            });
         }
     }
 

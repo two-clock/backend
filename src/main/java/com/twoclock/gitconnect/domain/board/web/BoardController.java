@@ -34,11 +34,12 @@ public class BoardController {
     }
 
     @PutMapping("/{boardId}")
-    public RestResponse updateBoard(@RequestBody @Valid BoardModifyReqDto boardUpdateReqDto,
+    public RestResponse updateBoard(@RequestPart @Valid BoardModifyReqDto boardUpdateReqDto,
                                     @PathVariable("boardId") Long boardId,
+                                    @RequestPart(required = false) MultipartFile[] files,
                                     @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();
-        BoardRespDto boardRespDto = boardService.modifyBoard(boardUpdateReqDto, boardId, githubId);
+        BoardRespDto boardRespDto = boardService.modifyBoard(boardUpdateReqDto, boardId, githubId, files);
         return RestResponse.OK();
     }
 
