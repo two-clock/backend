@@ -18,7 +18,7 @@ public enum ErrorCode {
     JWT_ERROR(HttpStatus.UNAUTHORIZED, "JWT-001", "JWT 토큰 에러가 발생했습니다."),
     JWT_REFRESH_TOKEN_ERROR(HttpStatus.FORBIDDEN, "JWT-002", "JWT 리프레쉬 토큰 에러가 발생했습니다."),
     JWT_BLACKLIST(HttpStatus.FORBIDDEN, "JWT-003", "블랙 리스트에 저장된 JWT 토큰입니다."),
-    JWT_EXPIRED(HttpStatus.FORBIDDEN, "JWT-004", "만료 기한이 지난 JWT 토큰입니다."),
+    JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "JWT-004", "만료 기한이 지난 JWT 토큰입니다."),
 
     NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "M-001", "찾을 수 없는 회원 계정입니다."),
     DIFF_USER_BOARD(HttpStatus.FORBIDDEN, "M-002", "게시글을 등록한 사용자와 일치하지 않습니다."),

@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -21,7 +22,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 import static com.twoclock.gitconnect.global.exception.constants.ErrorCode.JWT_BLACKLIST;
+import static com.twoclock.gitconnect.global.exception.constants.ErrorCode.JWT_EXPIRED;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -42,7 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         ) {
             String jwtAccessToken = authorization.substring(JwtService.BEARER_PREFIX.length());
             if (!jwtService.validateToken(jwtAccessToken)) {
-                filterChain.doFilter(request, response);
+                CustomResponseUtil.fail(
+                        response, JWT_EXPIRED.getHttpStatus(), JWT_EXPIRED.getCode(), JWT_EXPIRED.getMessage()
+                );
                 return;
             }
             if (jwtRedisService.isBlacklisted(jwtAccessToken)) {
