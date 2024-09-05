@@ -18,6 +18,7 @@ import com.twoclock.gitconnect.domain.comment.repository.CommentRepository;
 import com.twoclock.gitconnect.domain.like.entity.Likes;
 import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
+import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
@@ -92,23 +93,28 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto, String githubId) {
-        searchRequestDto = checkGetReportBoards(searchRequestDto, githubId);
+        Member member  = checkGetReportBoardMember(searchRequestDto.category(), githubId);
+        if(member != null) {
+            searchRequestDto = searchRequestDto.changeUseMember(githubId, member.getRole().toString());
+        }
         PageRequest pageRequest = searchRequestDto.toPageRequest();
         return boardRepository.searchBoardList(searchRequestDto, pageRequest);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
+        Member member  = checkGetReportBoardMember(board.getCategory().name(), githubId);
+        if(member != null) {
+            if(!Role.ROLE_ADMIN.equals(member.getRole()) && !member.getId().equals(board.getMember().getId())) {
+                throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
+            }
+        }
         board.addViewCount();
-        Page<Comment> commentPage = commentRepository.findByBoardId(
-                boardId,
-                PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdDateTime"))
-        );
-        Page<Likes> likePage = likeRepository.findByBoardId(
-                boardId,
-                PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdDateTime"))
-        );
+
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdDateTime"));
+        Page<Comment> commentPage = commentRepository.findByBoardId(boardId, pageRequest);
+        Page<Likes> likePage = likeRepository.findByBoardId(boardId, pageRequest);
         return new BoardDetailRespDto(board, commentPage, likePage);
     }
 
@@ -140,18 +146,27 @@ public class BoardService {
         }
     }
 
-    private SearchRequestDto checkGetReportBoards(SearchRequestDto searchRequestDto, String githubId) {
-        if (Category.BD3.equals(Category.of(searchRequestDto.category()))) {
+//    private SearchRequestDto checkGetReportBoards(SearchRequestDto searchRequestDto, String githubId) {
+//        if (Category.BD3.equals(Category.of(searchRequestDto.category()))) {
+//            if (githubId == null || githubId.isEmpty()) {
+//                throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
+//            }
+//            Member member = validateMember(githubId);
+//            String role = member.getRole().toString();
+//            return searchRequestDto.changeUseMember(githubId, role);
+//        }
+//        return searchRequestDto;
+//    }
+
+    private Member checkGetReportBoardMember(String category, String githubId) {
+        if (Category.BD3.equals(Category.of(category))) {
             if (githubId == null || githubId.isEmpty()) {
                 throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
             }
-            Member member = validateMember(githubId);
-            String role = member.getRole().toString();
-            return searchRequestDto.changeUseMember(githubId, role);
+            return validateMember(githubId);
         }
-        return searchRequestDto;
+        return null;
     }
-
     private void boardImageUpload(MultipartFile[] files, Board board) {
         if (files.length > 3) {
             throw new CustomException(ErrorCode.MANY_UPLOAD_IMAGES_BOARD);
