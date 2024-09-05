@@ -3,6 +3,8 @@ package com.twoclock.gitconnect.domain.like.repository;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.like.entity.Likes;
 import com.twoclock.gitconnect.domain.member.entity.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,4 +14,6 @@ public interface LikeRepository extends JpaRepository<Likes, Long> {
     boolean existsByBoardAndMember(Board board, Member member);
     Optional<Likes> findByBoardAndMember(Board board, Member member);
     List<Likes> findAllByBoard(Board board);
+
+    Page<Likes> findByBoardId(Long boardId, PageRequest createdDateTime);
 }

@@ -3,6 +3,7 @@ package com.twoclock.gitconnect.domain.like.dto;
 import com.twoclock.gitconnect.domain.like.entity.Likes;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record LikesRespDto(
         Long id,
@@ -21,5 +22,11 @@ public record LikesRespDto(
                 likes.getMember().getGitHubId(),
                 likes.getCreatedDateTime()
         );
+    }
+
+    public static List<LikesRespDto> likesListResult(List<Likes> likes){
+        return likes.stream()
+                .map(LikesRespDto::new)
+                .toList();
     }
 }

@@ -1,6 +1,7 @@
 package com.twoclock.gitconnect.domain.board.service;
 
 import com.twoclock.gitconnect.domain.board.dto.BoardCacheDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardDetailRespDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
@@ -12,6 +13,10 @@ import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardCacheRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardFileRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
+import com.twoclock.gitconnect.domain.comment.entity.Comment;
+import com.twoclock.gitconnect.domain.comment.repository.CommentRepository;
+import com.twoclock.gitconnect.domain.like.entity.Likes;
+import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
@@ -21,6 +26,7 @@ import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +45,8 @@ public class BoardService {
     private final MemberRepository memberRepository;
     private final BoardCacheRepository boardCacheRepository;
     private final BoardFileRepository boardFileRepository;
+    private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
     private final S3Service s3Service;
 
     private static final int MAX_BOARD_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -87,6 +95,21 @@ public class BoardService {
         searchRequestDto = checkGetReportBoards(searchRequestDto, githubId);
         PageRequest pageRequest = searchRequestDto.toPageRequest();
         return boardRepository.searchBoardList(searchRequestDto, pageRequest);
+    }
+
+    @Transactional(readOnly = true)
+    public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
+        Board board = validateBoard(boardId);
+        board.addViewCount();
+        Page<Comment> commentPage = commentRepository.findByBoardId(
+                boardId,
+                PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdDateTime"))
+        );
+        Page<Likes> likePage = likeRepository.findByBoardId(
+                boardId,
+                PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdDateTime"))
+        );
+        return new BoardDetailRespDto(board, commentPage, likePage);
     }
 
     @Transactional
