@@ -28,14 +28,15 @@ import java.util.List;
 public class WebSecurityConfig {
 
     private static final String[] GET_PERMIT_STRINGS = {
-            "api/v1/hello",
+            "/api/v1/hello",
             "/api/v1/members/auth/github/callback",
             "/api/v1/boards",
             "/api/v1/boards/*/comments",
             "/api/v1/likes/*"
     };
     private static final String[] POST_PERMIT_STRINGS = {
-            "/api/v1/members/auth/refresh"
+            "/api/v1/members/auth/logout",
+            "/api/v1/members/auth/refresh",
     };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -54,11 +55,13 @@ public class WebSecurityConfig {
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:3000", "http://127.0.0.1:3000",
-                        "http://localhost:5500", "http://127.0.0.1:5500"
+                        "http://localhost:5500", "http://127.0.0.1:5500",
+                        "http://localhost:7777", "http://127.0.0.1:7777"
                 )
         );
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

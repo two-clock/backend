@@ -67,7 +67,7 @@ public class MemberAuthService {
         blacklistToken(jwtAccessToken);
         jwtRedisService.deleteRefreshToken(gitHubId);
 
-        CookieUtil.deleteCookie(response, "refreshToken");
+        CookieUtil.deleteCookie(response, JwtService.JWT_REFRESH_TOKEN_KEY);
         deleteGitHubTokens(gitHubId);
     }
 
@@ -108,7 +108,7 @@ public class MemberAuthService {
 
     private void setAuthTokens(HttpServletResponse response, Member member, JwtTokenDto jwtTokenDto, GitHubTokenDto gitHubTokenDto) {
         setAuthorizationHeader(response, jwtTokenDto.accessToken());
-        CookieUtil.addCookie(response, "refreshToken", jwtTokenDto.refreshToken(), JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
+        CookieUtil.addCookie(response, JwtService.JWT_REFRESH_TOKEN_KEY, jwtTokenDto.refreshToken(), JwtService.REFRESH_TOKEN_EXPIRATION_TIME);
         saveTokensToRedis(member, jwtTokenDto, gitHubTokenDto);
     }
 
@@ -141,6 +141,11 @@ public class MemberAuthService {
     private void blacklistToken(String jwtAccessToken) {
         long expirationTime = jwtService.getTokenExpirationTime(jwtAccessToken);
         long now = new Date().getTime();
+
+        if (expirationTime < now) {
+            return;
+        }
+
         jwtRedisService.addToBlacklist(jwtAccessToken, expirationTime - now);
     }
 

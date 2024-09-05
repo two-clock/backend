@@ -2,6 +2,7 @@ package com.twoclock.gitconnect.domain.member.web;
 
 import com.twoclock.gitconnect.domain.member.dto.MemberLoginRespDto;
 import com.twoclock.gitconnect.domain.member.service.MemberAuthService;
+import com.twoclock.gitconnect.global.jwt.service.JwtService;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +24,7 @@ public class MemberAuthController {
 
     @PostMapping("/refresh")
     public RestResponse refreshJwtToken(
-            @CookieValue(name = "refreshToken") String refreshToken,
+            @CookieValue(name = JwtService.JWT_REFRESH_TOKEN_KEY) String refreshToken,
             HttpServletResponse httpServletResponse
     ) {
         memberAuthService.refreshJwtToken(refreshToken, httpServletResponse);

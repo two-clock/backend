@@ -21,7 +21,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 import static com.twoclock.gitconnect.global.exception.constants.ErrorCode.JWT_BLACKLIST;
-import static com.twoclock.gitconnect.global.exception.constants.ErrorCode.JWT_EXPIRED;
 
 @RequiredArgsConstructor
 @Component
@@ -43,9 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         ) {
             String jwtAccessToken = authorization.substring(JwtService.BEARER_PREFIX.length());
             if (!jwtService.validateToken(jwtAccessToken)) {
-                CustomResponseUtil.fail(
-                        response, JWT_EXPIRED.getHttpStatus(), JWT_EXPIRED.getCode(), JWT_EXPIRED.getMessage()
-                );
+                filterChain.doFilter(request, response);
                 return;
             }
             if (jwtRedisService.isBlacklisted(jwtAccessToken)) {

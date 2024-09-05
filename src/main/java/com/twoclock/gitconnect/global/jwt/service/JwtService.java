@@ -21,6 +21,7 @@ public class JwtService {
 
     private static final int ACCESS_TOKEN_EXPIRATION_TIME = 30 * 60 * 1000; // 30분
     public static final int REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000; // 일주일
+    public static final String JWT_REFRESH_TOKEN_KEY = "refresh-token";
 
     private static final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
     public static final String BEARER_PREFIX = "Bearer ";

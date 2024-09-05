@@ -10,6 +10,7 @@ public class CookieUtil {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(maxAge);
+        cookie.setSecure(true);
         response.addCookie(cookie);
     }
 
@@ -17,7 +18,7 @@ public class CookieUtil {
         Cookie cookie = new Cookie(name, null);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(0);  // 0으로 설정하여 즉시 삭제
+        cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
 }
