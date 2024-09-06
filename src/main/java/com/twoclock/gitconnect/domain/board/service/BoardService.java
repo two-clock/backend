@@ -13,8 +13,6 @@ import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardCacheRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardFileRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
-import com.twoclock.gitconnect.domain.comment.repository.CommentRepository;
-import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
@@ -23,6 +21,7 @@ import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.global.s3.S3Service;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -96,6 +95,7 @@ public class BoardService {
         return boardRepository.searchBoardList(searchRequestDto, pageRequest);
     }
 
+    @Cacheable(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "cacheManager")
     @Transactional
     public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
