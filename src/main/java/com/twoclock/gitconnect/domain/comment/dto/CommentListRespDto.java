@@ -25,10 +25,4 @@ public record CommentListRespDto(
                 comment.getCreatedDateTime()
         );
     }
-
-    public static List<CommentListRespDto> commentListResult(List<Comment> comments){
-        return comments.stream()
-                .map(CommentListRespDto::new)
-                .toList();
-    }
 }

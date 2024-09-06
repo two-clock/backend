@@ -23,10 +23,4 @@ public record LikesRespDto(
                 likes.getCreatedDateTime()
         );
     }
-
-    public static List<LikesRespDto> likesListResult(List<Likes> likes){
-        return likes.stream()
-                .map(LikesRespDto::new)
-                .toList();
-    }
 }

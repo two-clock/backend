@@ -13,9 +13,7 @@ import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardCacheRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardFileRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
-import com.twoclock.gitconnect.domain.comment.entity.Comment;
 import com.twoclock.gitconnect.domain.comment.repository.CommentRepository;
-import com.twoclock.gitconnect.domain.like.entity.Likes;
 import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.entity.constants.Role;
@@ -27,7 +25,6 @@ import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,8 +43,6 @@ public class BoardService {
     private final MemberRepository memberRepository;
     private final BoardCacheRepository boardCacheRepository;
     private final BoardFileRepository boardFileRepository;
-    private final CommentRepository commentRepository;
-    private final LikeRepository likeRepository;
     private final S3Service s3Service;
 
     private static final int MAX_BOARD_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -111,11 +106,7 @@ public class BoardService {
             }
         }
         board.addViewCount();
-
-        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdDateTime"));
-        Page<Comment> commentPage = commentRepository.findByBoardId(boardId, pageRequest);
-        Page<Likes> likePage = likeRepository.findByBoardId(boardId, pageRequest);
-        return new BoardDetailRespDto(board, commentPage, likePage);
+        return new BoardDetailRespDto(board);
     }
 
     @Transactional
