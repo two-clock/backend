@@ -95,7 +95,7 @@ public class BoardService {
         return boardRepository.searchBoardList(searchRequestDto, pageRequest);
     }
 
-    @Cacheable(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "cacheManager")
+    @Cacheable(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "redisCacheManager")
     @Transactional
     public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
