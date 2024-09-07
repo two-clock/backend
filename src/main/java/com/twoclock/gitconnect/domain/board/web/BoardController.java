@@ -8,6 +8,7 @@ import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
 import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.service.BoardService;
 import com.twoclock.gitconnect.global.model.RestResponse;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -46,7 +47,7 @@ public class BoardController {
 
     @GetMapping
     public RestResponse getBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto,
-                                     @AuthenticationPrincipal UserDetails userDetails) {
+                                     @Nullable @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails == null ? null : userDetails.getUsername();
         Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto, githubId);
         return new RestResponse(boardRespDto);
@@ -54,7 +55,7 @@ public class BoardController {
 
     @GetMapping("/{boardId}")
     public RestResponse getBoardDetail(@PathVariable("boardId") Long boardId,
-                                       @AuthenticationPrincipal UserDetails userDetails) {
+                                       @Nullable @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails == null ? null : userDetails.getUsername();
         BoardDetailRespDto result = boardService.getBoardDetail(boardId, githubId);
         return new RestResponse(result);
