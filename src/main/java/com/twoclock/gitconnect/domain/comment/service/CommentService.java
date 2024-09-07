@@ -11,8 +11,14 @@ import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.twoclock.gitconnect.global.model.Pagination;
+import com.twoclock.gitconnect.global.model.PagingResponse;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,12 +65,22 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentListRespDto> getComments(Long boardId) {
+    public PagingResponse<List<CommentListRespDto>> getComments(Long boardId, int page, int size) {
         Board board = validateBoard(boardId);
-        List<Comment> comments = commentRepository.findAllByBoard(board);
-        return comments.stream()
+        Pageable pageable = PageRequest.of(page <= 0 ? 0 : page - 1, size, Sort.by("createdDateTime").descending());
+        Page<Comment> comments = commentRepository.findAllByBoard(board, pageable);
+
+        List<CommentListRespDto> result = comments.stream()
                 .map(CommentListRespDto::new)
                 .toList();
+
+        Pagination pagination = new Pagination();
+        pagination.setPageInfo(comments.getTotalElements(), page, size);
+
+        return PagingResponse.<List<CommentListRespDto>>builder()
+                .listData(result)
+                .pagination(pagination)
+                .build();
     }
 
     private Board validateBoard(Long boardId) {
