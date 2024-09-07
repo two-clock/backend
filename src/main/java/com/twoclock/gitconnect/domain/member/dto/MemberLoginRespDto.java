@@ -1,6 +1,7 @@
 package com.twoclock.gitconnect.domain.member.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
+import com.twoclock.gitconnect.domain.member.entity.Member;
 
 public record MemberLoginRespDto(
         String login,
@@ -15,6 +16,10 @@ public record MemberLoginRespDto(
         this.gitHubId = gitHubId;
         this.avatarUrl = avatarUrl;
         this.name = name;
+    }
+
+    public static MemberLoginRespDto of(Member member) {
+        return new MemberLoginRespDto(member.getLogin(), member.getGitHubId(), member.getAvatarUrl(), member.getName());
     }
 
 }

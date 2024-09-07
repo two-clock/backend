@@ -1,6 +1,7 @@
 package com.twoclock.gitconnect.domain.board.service;
 
 import com.twoclock.gitconnect.domain.board.dto.BoardCacheDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardDetailRespDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
@@ -13,12 +14,14 @@ import com.twoclock.gitconnect.domain.board.repository.BoardCacheRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardFileRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
+import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.global.s3.S3Service;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -84,9 +87,26 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto, String githubId) {
-        searchRequestDto = checkGetReportBoards(searchRequestDto, githubId);
+        Member member  = checkGetReportBoardMember(searchRequestDto.category(), githubId);
+        if(member != null) {
+            searchRequestDto = searchRequestDto.changeUseMember(githubId, member.getRole().toString());
+        }
         PageRequest pageRequest = searchRequestDto.toPageRequest();
         return boardRepository.searchBoardList(searchRequestDto, pageRequest);
+    }
+
+    @Cacheable(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "redisCacheManager")
+    @Transactional
+    public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
+        Board board = validateBoard(boardId);
+        Member member  = checkGetReportBoardMember(board.getCategory().name(), githubId);
+        if(member != null) {
+            if(!Role.ROLE_ADMIN.equals(member.getRole()) && !member.getId().equals(board.getMember().getId())) {
+                throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
+            }
+        }
+        board.addViewCount();
+        return new BoardDetailRespDto(board);
     }
 
     @Transactional
@@ -117,18 +137,27 @@ public class BoardService {
         }
     }
 
-    private SearchRequestDto checkGetReportBoards(SearchRequestDto searchRequestDto, String githubId) {
-        if (Category.BD3.equals(Category.of(searchRequestDto.category()))) {
+//    private SearchRequestDto checkGetReportBoards(SearchRequestDto searchRequestDto, String githubId) {
+//        if (Category.BD3.equals(Category.of(searchRequestDto.category()))) {
+//            if (githubId == null || githubId.isEmpty()) {
+//                throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
+//            }
+//            Member member = validateMember(githubId);
+//            String role = member.getRole().toString();
+//            return searchRequestDto.changeUseMember(githubId, role);
+//        }
+//        return searchRequestDto;
+//    }
+
+    private Member checkGetReportBoardMember(String category, String githubId) {
+        if (Category.BD3.equals(Category.of(category))) {
             if (githubId == null || githubId.isEmpty()) {
                 throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
             }
-            Member member = validateMember(githubId);
-            String role = member.getRole().toString();
-            return searchRequestDto.changeUseMember(githubId, role);
+            return validateMember(githubId);
         }
-        return searchRequestDto;
+        return null;
     }
-
     private void boardImageUpload(MultipartFile[] files, Board board) {
         if (files.length > 3) {
             throw new CustomException(ErrorCode.MANY_UPLOAD_IMAGES_BOARD);

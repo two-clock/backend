@@ -46,6 +46,9 @@ public class Board extends BaseEntity {
     @Column(nullable = false)
     private final boolean isView = true;
 
+    @Column(nullable = false)
+    private Long viewCount = 0L;
+
     @Builder
     public Board(Member member, String nickname, Category category, String title, String content) {
         this.member = member;
@@ -66,5 +69,9 @@ public class Board extends BaseEntity {
     public void updateBoard(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void addViewCount() {
+        this.viewCount++;
     }
 }

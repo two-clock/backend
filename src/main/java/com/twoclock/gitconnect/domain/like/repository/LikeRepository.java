@@ -12,4 +12,5 @@ public interface LikeRepository extends JpaRepository<Likes, Long> {
     boolean existsByBoardAndMember(Board board, Member member);
     Optional<Likes> findByBoardAndMember(Board board, Member member);
     List<Likes> findAllByBoard(Board board);
+
 }

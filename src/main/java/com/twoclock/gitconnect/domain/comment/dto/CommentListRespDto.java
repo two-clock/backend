@@ -3,6 +3,7 @@ package com.twoclock.gitconnect.domain.comment.dto;
 import com.twoclock.gitconnect.domain.comment.entity.Comment;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record CommentListRespDto(
         Long id,
