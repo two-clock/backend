@@ -41,9 +41,9 @@ public class DummyDevlnit {
 
             // 테스트 게시글 생성
             List<Board> boards = new ArrayList<>();
-            createDummyBoards(boards, "계정 홍보 테스트 게시글", Category.BD1, 10, members.get(0));
-            createDummyBoards(boards, "저장소 홍보 테스트 게시글", Category.BD2, 10, members.get(0));
-            createDummyBoards(boards, "사용자 신고 테스트 게시글", Category.BD3, 10, members.get(0));
+            createDummyBoards(boards, "계정 홍보 테스트 게시글", Category.BD1, 100, members.get(0));
+            createDummyBoards(boards, "저장소 홍보 테스트 게시글", Category.BD2, 100, members.get(0));
+            createDummyBoards(boards, "사용자 신고 테스트 게시글", Category.BD3, 100, members.get(0));
             boardRepository.saveAll(boards);
 
             // 테스트 댓글 생성

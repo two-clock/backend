@@ -1,12 +1,9 @@
 package com.twoclock.gitconnect.domain.board.service;
 
-import com.twoclock.gitconnect.domain.board.dto.BoardCacheDto;
-import com.twoclock.gitconnect.domain.board.dto.BoardDetailRespDto;
+import com.twoclock.gitconnect.domain.board.dto.*;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
-import com.twoclock.gitconnect.domain.board.dto.SearchRequestDto;
-import com.twoclock.gitconnect.domain.board.dto.SearchResponseDto;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.BoardFile;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
@@ -87,8 +84,8 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto, String githubId) {
-        Member member  = checkGetReportBoardMember(searchRequestDto.category(), githubId);
-        if(member != null) {
+        Member member = checkGetReportBoardMember(searchRequestDto.category(), githubId);
+        if (member != null) {
             searchRequestDto = searchRequestDto.changeUseMember(githubId, member.getRole().toString());
         }
         PageRequest pageRequest = searchRequestDto.toPageRequest();
@@ -99,14 +96,35 @@ public class BoardService {
     @Transactional
     public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
-        Member member  = checkGetReportBoardMember(board.getCategory().name(), githubId);
-        if(member != null) {
-            if(!Role.ROLE_ADMIN.equals(member.getRole()) && !member.getId().equals(board.getMember().getId())) {
+        Member member = checkGetReportBoardMember(board.getCategory().name(), githubId);
+        if (member != null) {
+            if (!Role.ROLE_ADMIN.equals(member.getRole()) && !member.getId().equals(board.getMember().getId())) {
                 throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
             }
         }
         board.addViewCount();
         return new BoardDetailRespDto(board);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BoardWithCategoryRespDto> getBoardListWithCategory(String category, int page, int size) {
+        Category boardCategory = Category.of(category);
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return boardRepository.findByCategoryOrderByCreatedDateTimeDesc(boardCategory, pageRequest).getContent()
+                .stream()
+                .map(categoryBoard -> {
+                    BoardFile boardFile = boardFileRepository.findFirstByBoard(categoryBoard).orElse(null);
+                    return new BoardWithCategoryRespDto(
+                            categoryBoard.getId(),
+                            categoryBoard.getTitle(),
+                            categoryBoard.getContent(),
+                            categoryBoard.getMember().getLogin(),
+                            boardFile != null ? boardFile.getFileUrl() : null,
+                            categoryBoard.getCreatedDateTime()
+                    );
+                })
+                .toList();
     }
 
     @Transactional
@@ -158,6 +176,7 @@ public class BoardService {
         }
         return null;
     }
+
     private void boardImageUpload(MultipartFile[] files, Board board) {
         if (files.length > 3) {
             throw new CustomException(ErrorCode.MANY_UPLOAD_IMAGES_BOARD);
