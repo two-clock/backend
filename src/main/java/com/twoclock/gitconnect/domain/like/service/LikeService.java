@@ -9,11 +9,17 @@ import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.twoclock.gitconnect.global.model.Pagination;
+import com.twoclock.gitconnect.global.model.PagingResponse;
+import com.twoclock.gitconnect.global.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -51,10 +57,19 @@ public class LikeService {
     }
 
     @Transactional(readOnly = true)
-    public List<LikesRespDto> getLikesByBoardId(Long boardId) {
+    public PagingResponse<List<LikesRespDto>> getLikesByBoardId(Long boardId, int page, int size) {
         Board board = validateBoard(boardId);
-        List<Likes> likes = likeRepository.findAllByBoard(board);
-        return likes.stream().map(LikesRespDto::new).toList();
+        Pageable pageable = createPageable(page, size);
+
+        Page<Likes> likes = likeRepository.findAllByBoard(board, pageable);
+        List<LikesRespDto> result = likes.stream().map(LikesRespDto::new).toList();
+
+        Pagination pagination = PaginationUtil.pageInfo(likes.getTotalElements(), page, size);
+
+        return PagingResponse.<List<LikesRespDto>>builder()
+                .listData(result)
+                .pagination(pagination)
+                .build();
     }
 
     private Board validateBoard(Long boardId) {
@@ -67,5 +82,10 @@ public class LikeService {
         return memberRepository.findByGitHubId(githubId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
+    }
+
+    private Pageable createPageable(int page, int size) {
+        int validatedPage = Math.max(0, page - 1);
+        return PageRequest.of(validatedPage, size, Sort.by("createdDateTime").descending());
     }
 }
