@@ -13,6 +13,7 @@ import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.global.model.Pagination;
 import com.twoclock.gitconnect.global.model.PagingResponse;
+import com.twoclock.gitconnect.global.util.PaginationUtil;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,15 +68,12 @@ public class CommentService {
     @Transactional(readOnly = true)
     public PagingResponse<List<CommentListRespDto>> getComments(Long boardId, int page, int size) {
         Board board = validateBoard(boardId);
-        Pageable pageable = PageRequest.of(page <= 0 ? 0 : page - 1, size, Sort.by("createdDateTime").descending());
+        Pageable pageable = createPageable(page, size);
+
         Page<Comment> comments = commentRepository.findAllByBoard(board, pageable);
+        List<CommentListRespDto> result = mapCommentsToDto(comments);
 
-        List<CommentListRespDto> result = comments.stream()
-                .map(CommentListRespDto::new)
-                .toList();
-
-        Pagination pagination = new Pagination();
-        pagination.setPageInfo(comments.getTotalElements(), page, size);
+        Pagination pagination = PaginationUtil.pageInfo(comments.getTotalElements(), page, size);
 
         return PagingResponse.<List<CommentListRespDto>>builder()
                 .listData(result)
@@ -106,5 +104,16 @@ public class CommentService {
         if (filtering.check(content)) {
             throw new CustomException(ErrorCode.BAD_WORD);
         }
+    }
+
+    private Pageable createPageable(int page, int size) {
+        int validatedPage = Math.max(0, page - 1);
+        return PageRequest.of(validatedPage, size, Sort.by("createdDateTime").descending());
+    }
+
+    private List<CommentListRespDto> mapCommentsToDto(Page<Comment> comments) {
+        return comments.stream()
+                .map(CommentListRespDto::new)
+                .toList();
     }
 }
