@@ -64,11 +64,12 @@ public class BoardController {
 
     @GetMapping
     public RestResponse getBoardListWithCategory(
+            @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "category") String category,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size
     ) {
-        List<BoardWithCategoryRespDto> responseDtos = boardService.getBoardListWithCategory(category, page, size);
+        List<BoardWithCategoryRespDto> responseDtos = boardService.getBoardListWithCategory(keyword, category, page, size);
         return new RestResponse(responseDtos);
     }
 

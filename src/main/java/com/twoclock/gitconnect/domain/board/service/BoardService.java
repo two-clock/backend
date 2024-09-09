@@ -41,8 +41,10 @@ public class BoardService {
     private final BoardFileRepository boardFileRepository;
     private final S3Service s3Service;
 
-    private static final int MAX_BOARD_IMAGE_SIZE = 5 * 1024 * 1024;
-    private static final List<String> PERMIT_BOARD_IMAGE_TYPE = List.of("image/jpeg", "image/jpg", "image/png");
+    private static final int MAX_BOARD_IMAGE_SIZE = 15 * 1024 * 1024;
+    private static final List<String> PERMIT_BOARD_IMAGE_TYPE = List.of(
+            "image/jpeg", "image/jpg", "image/png", "image/gif", "image/bmp", "image/webp"
+    );
 
     @Transactional
     public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId, MultipartFile[] files) {
@@ -62,7 +64,9 @@ public class BoardService {
                 .build();
         Board boardPS = boardRepository.save(board);
 
-        if (files.length != 0) boardImageUpload(files, boardPS);
+        if (files != null && files.length != 0) {
+            boardImageUpload(files, boardPS);
+        }
         boardCacheRepository.setBoardCache(key, new BoardCacheDto(boardPS));
         return new BoardRespDto(boardPS);
     }
@@ -107,11 +111,11 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public List<BoardWithCategoryRespDto> getBoardListWithCategory(String category, int page, int size) {
+    public List<BoardWithCategoryRespDto> getBoardListWithCategory(String keyword, String category, int page, int size) {
         Category boardCategory = Category.of(category);
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        return boardRepository.findByCategoryOrderByCreatedDateTimeDesc(boardCategory, pageRequest).getContent()
+        return boardRepository.findByKeywordAndCategory(keyword, boardCategory, pageRequest).getContent()
                 .stream()
                 .map(categoryBoard -> {
                     BoardFile boardFile = boardFileRepository.findFirstByBoard(categoryBoard).orElse(null);
