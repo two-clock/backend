@@ -4,6 +4,7 @@ import com.twoclock.gitconnect.domain.comment.dto.CommentListRespDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentModifyReqDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentRegistReqDto;
 import com.twoclock.gitconnect.domain.comment.service.CommentService;
+import com.twoclock.gitconnect.global.model.PagingResponse;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +48,10 @@ public class CommentController {
     }
 
     @GetMapping("/boards/{boardId}/comments")
-    public RestResponse getComments(@PathVariable("boardId") Long boardId) {
-        List<CommentListRespDto> result = commentService.getComments(boardId);
+    public RestResponse getComments(@PathVariable("boardId") Long boardId,
+                                    @RequestParam(value = "page", defaultValue = "0") int page,
+                                    @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        PagingResponse<List<CommentListRespDto>> result = commentService.getComments(boardId, page, size);
         return new RestResponse(result);
     }
 }

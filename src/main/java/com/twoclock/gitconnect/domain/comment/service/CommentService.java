@@ -11,8 +11,15 @@ import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.twoclock.gitconnect.global.model.Pagination;
+import com.twoclock.gitconnect.global.model.PagingResponse;
+import com.twoclock.gitconnect.global.util.PaginationUtil;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,12 +66,19 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentListRespDto> getComments(Long boardId) {
+    public PagingResponse<List<CommentListRespDto>> getComments(Long boardId, int page, int size) {
         Board board = validateBoard(boardId);
-        List<Comment> comments = commentRepository.findAllByBoard(board);
-        return comments.stream()
-                .map(CommentListRespDto::new)
-                .toList();
+        Pageable pageable = createPageable(page, size);
+
+        Page<Comment> comments = commentRepository.findAllByBoard(board, pageable);
+        List<CommentListRespDto> result = mapCommentsToDto(comments);
+
+        Pagination pagination = PaginationUtil.pageInfo(comments.getTotalElements(), page, size);
+
+        return PagingResponse.<List<CommentListRespDto>>builder()
+                .listData(result)
+                .pagination(pagination)
+                .build();
     }
 
     private Board validateBoard(Long boardId) {
@@ -90,5 +104,16 @@ public class CommentService {
         if (filtering.check(content)) {
             throw new CustomException(ErrorCode.BAD_WORD);
         }
+    }
+
+    private Pageable createPageable(int page, int size) {
+        int validatedPage = Math.max(0, page - 1);
+        return PageRequest.of(validatedPage, size, Sort.by("createdDateTime").descending());
+    }
+
+    private List<CommentListRespDto> mapCommentsToDto(Page<Comment> comments) {
+        return comments.stream()
+                .map(CommentListRespDto::new)
+                .toList();
     }
 }
