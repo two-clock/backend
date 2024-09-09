@@ -36,8 +36,8 @@ public class LikeController {
 
     @GetMapping("/{boardId}")
     public RestResponse getLikesByBoardId(@PathVariable("boardId") Long boardId,
-                                          @RequestParam int page,
-                                          @RequestParam int size) {
+                                          @RequestParam(value = "page", defaultValue = "0") int page,
+                                          @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagingResponse<List<LikesRespDto>> result = likeService.getLikesByBoardId(boardId, page, size);
         return new RestResponse(result);
     }
