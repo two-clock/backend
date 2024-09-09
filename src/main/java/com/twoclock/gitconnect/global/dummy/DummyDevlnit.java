@@ -90,7 +90,7 @@ public class DummyDevlnit {
     }
 
     private void createDummyNotifications(List<Notification> notifications, int count,
-                                         Member member) {
+                                          Member member) {
         for (int i = 0; i < count; i++) {
             Notification notification = Notification.builder()
                     .member(member)

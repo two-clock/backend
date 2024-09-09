@@ -28,13 +28,12 @@ public class Notification extends BaseEntity {
 
     private String message;
 
-    private boolean isRead = false;
+    private final boolean isRead = false;
 
     @Builder
-    public Notification(Member member, NotificationType type, String message, boolean isRead) {
+    public Notification(Member member, NotificationType type, String message) {
         this.member = member;
         this.type = type;
         this.message = message;
-        this.isRead = isRead;
     }
 }
