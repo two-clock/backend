@@ -53,6 +53,16 @@ public class NotificationService {
         return deferredResult;
     }
 
+    // TODO : 댓글, 게시글, 사용자 신고 알림 생성
+    @Transactional
+    public void notifyUser(Member member) {
+        List<Notification> notifications = notificationRepository.findByMemberAndIsReadFalse(member);
+        List<DeferredResult<List<NotificationRespDto>>> userDeferredResults = waitingUsers.remove(member);
+        if (!userDeferredResults.isEmpty()) {
+            userDeferredResults.forEach(r -> r.setResult(toMapNotificationResp(notifications)));
+        }
+    }
+
     private Member validateMember(String githubId) {
         return memberRepository.findByGitHubId(githubId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
     }
