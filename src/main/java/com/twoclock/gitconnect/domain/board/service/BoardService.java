@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -100,6 +101,8 @@ public class BoardService {
     @Transactional
     public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
+        List<BoardFileRespDto> fileList = getFileList(boardId);
+
         Member member = checkGetReportBoardMember(board.getCategory().name(), githubId);
         if (member != null) {
             if (!Role.ROLE_ADMIN.equals(member.getRole()) && !member.getId().equals(board.getMember().getId())) {
@@ -107,7 +110,7 @@ public class BoardService {
             }
         }
         board.addViewCount();
-        return new BoardDetailRespDto(board);
+        return new BoardDetailRespDto(board, fileList);
     }
 
     @Transactional(readOnly = true)
@@ -159,18 +162,6 @@ public class BoardService {
         }
     }
 
-//    private SearchRequestDto checkGetReportBoards(SearchRequestDto searchRequestDto, String githubId) {
-//        if (Category.BD3.equals(Category.of(searchRequestDto.category()))) {
-//            if (githubId == null || githubId.isEmpty()) {
-//                throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
-//            }
-//            Member member = validateMember(githubId);
-//            String role = member.getRole().toString();
-//            return searchRequestDto.changeUseMember(githubId, role);
-//        }
-//        return searchRequestDto;
-//    }
-
     private Member checkGetReportBoardMember(String category, String githubId) {
         if (Category.BD3.equals(Category.of(category))) {
             if (githubId == null || githubId.isEmpty()) {
@@ -191,6 +182,13 @@ public class BoardService {
             BoardFile boardFile = BoardFile.builder().board(board).originalName(originalName).fileUrl(fileUrl).build();
             boardFileRepository.save(boardFile);
         }
+    }
+
+    private List<BoardFileRespDto> getFileList(Long boardId) {
+        List<BoardFile> boardFiles = boardFileRepository.findByBoardId(boardId);
+        return (boardFiles.isEmpty())
+                ? Collections.emptyList()
+                : boardFiles.stream().map(BoardFileRespDto::new).toList();
     }
 
     private String uploadFileUrl(MultipartFile file) {
