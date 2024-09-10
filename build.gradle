@@ -80,6 +80,9 @@ dependencies {
 
     // aws s3
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.97'
+
+    // Faker
+    implementation 'net.datafaker:datafaker:2.3.1'
 }
 
 tasks.named('test') {
