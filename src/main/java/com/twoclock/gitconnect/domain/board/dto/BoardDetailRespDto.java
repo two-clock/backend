@@ -12,7 +12,7 @@ public record BoardDetailRespDto(
         String content,
         String nickname,
         String category,
-        LocalDateTime createdDateTime,
+        String createdDateTime,
         MemberLoginRespDto member,
         List<BoardFileRespDto> fileList
 ) {
@@ -23,7 +23,7 @@ public record BoardDetailRespDto(
                 board.getContent(),
                 board.getMember().getName(),
                 board.getCategory().name(),
-                board.getCreatedDateTime(),
+                String.valueOf(board.getCreatedDateTime()),
                 MemberLoginRespDto.of(board.getMember()),
                 fileList
         );
