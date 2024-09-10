@@ -7,6 +7,9 @@ import com.twoclock.gitconnect.domain.comment.entity.Comment;
 import com.twoclock.gitconnect.domain.comment.repository.CommentRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
+import com.twoclock.gitconnect.domain.notification.entity.Notification;
+import com.twoclock.gitconnect.domain.notification.entity.constants.NotificationType;
+import com.twoclock.gitconnect.domain.notification.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +31,8 @@ public class DummyDevlnit {
     @Bean
     CommandLineRunner init(MemberRepository memberRepository,
                            BoardRepository boardRepository,
-                           CommentRepository commentRepository) {
+                           CommentRepository commentRepository,
+                           NotificationRepository notificationRepository) {
         return (args) -> {
             log.info("Dummy Data Init");
 
@@ -50,6 +54,11 @@ public class DummyDevlnit {
             List<Comment> comments = new ArrayList<>();
             createDummyComments(comments, 5, members.get(0), boards.get(0));
             commentRepository.saveAll(comments);
+
+            // 테스트 알림 생성
+            List<Notification> notification = new ArrayList<>();
+            createDummyNotifications(notification, 5, members.get(0));
+            notificationRepository.saveAll(notification);
         };
     }
 
@@ -77,6 +86,18 @@ public class DummyDevlnit {
                     .content("테스트 댓글 입니다 " + i)
                     .build();
             comments.add(comment);
+        }
+    }
+
+    private void createDummyNotifications(List<Notification> notifications, int count,
+                                          Member member) {
+        for (int i = 0; i < count; i++) {
+            Notification notification = Notification.builder()
+                    .member(member)
+                    .message("테스트 알림 메시지" + i)
+                    .type(NotificationType.CHAT)
+                    .build();
+            notifications.add(notification);
         }
     }
 
