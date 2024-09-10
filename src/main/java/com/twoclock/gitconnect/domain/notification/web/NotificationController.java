@@ -21,11 +21,10 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @GetMapping()
+    @GetMapping
     public RestResponse getNotificationList(@AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();
         DeferredResult<List<NotificationRespDto>> result = notificationService.getNotificationList(githubId);
         return new RestResponse(result);
     }
-
 }
