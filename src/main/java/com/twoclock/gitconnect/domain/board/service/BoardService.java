@@ -18,6 +18,7 @@ import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.global.s3.S3Service;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -72,6 +73,7 @@ public class BoardService {
         return new BoardRespDto(boardPS);
     }
 
+    @CacheEvict(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "redisCacheManager")
     @Transactional
     public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long boardId, String githubId, MultipartFile[] files) {
         filteringBadWord(boardUpdateReqDto.content());
@@ -81,7 +83,9 @@ public class BoardService {
 
         deleteBoardImage(boardId, boardUpdateReqDto.fileOriginImageList());
 
-        if (files.length != 0) boardImageUpload(files, board);
+        if (files != null && files.length != 0) {
+            boardImageUpload(files, board);
+        }
         board.updateBoard(boardUpdateReqDto.title(), boardUpdateReqDto.content());
 
         return new BoardRespDto(board);
@@ -134,6 +138,7 @@ public class BoardService {
                 .toList();
     }
 
+    @CacheEvict(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "redisCacheManager")
     @Transactional
     public void deleteBoard(Long boardId, String githubId) {
         Member member = validateMember(githubId);
