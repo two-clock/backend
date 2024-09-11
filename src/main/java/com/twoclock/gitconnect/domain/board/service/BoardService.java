@@ -18,6 +18,7 @@ import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.global.s3.S3Service;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,6 +73,7 @@ public class BoardService {
         return new BoardRespDto(boardPS);
     }
 
+    @CacheEvict(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "redisCacheManager")
     @Transactional
     public BoardRespDto modifyBoard(BoardModifyReqDto boardUpdateReqDto, Long boardId, String githubId, MultipartFile[] files) {
         filteringBadWord(boardUpdateReqDto.content());
@@ -80,7 +83,9 @@ public class BoardService {
 
         deleteBoardImage(boardId, boardUpdateReqDto.fileOriginImageList());
 
-        if (files.length != 0) boardImageUpload(files, board);
+        if (files != null && files.length != 0) {
+            boardImageUpload(files, board);
+        }
         board.updateBoard(boardUpdateReqDto.title(), boardUpdateReqDto.content());
 
         return new BoardRespDto(board);
@@ -100,6 +105,8 @@ public class BoardService {
     @Transactional
     public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
+        List<BoardFileRespDto> fileList = getFileList(boardId);
+
         Member member = checkGetReportBoardMember(board.getCategory().name(), githubId);
         if (member != null) {
             if (!Role.ROLE_ADMIN.equals(member.getRole()) && !member.getId().equals(board.getMember().getId())) {
@@ -107,7 +114,7 @@ public class BoardService {
             }
         }
         board.addViewCount();
-        return new BoardDetailRespDto(board);
+        return new BoardDetailRespDto(board, fileList);
     }
 
     @Transactional(readOnly = true)
@@ -131,6 +138,7 @@ public class BoardService {
                 .toList();
     }
 
+    @CacheEvict(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "redisCacheManager")
     @Transactional
     public void deleteBoard(Long boardId, String githubId) {
         Member member = validateMember(githubId);
@@ -159,18 +167,6 @@ public class BoardService {
         }
     }
 
-//    private SearchRequestDto checkGetReportBoards(SearchRequestDto searchRequestDto, String githubId) {
-//        if (Category.BD3.equals(Category.of(searchRequestDto.category()))) {
-//            if (githubId == null || githubId.isEmpty()) {
-//                throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
-//            }
-//            Member member = validateMember(githubId);
-//            String role = member.getRole().toString();
-//            return searchRequestDto.changeUseMember(githubId, role);
-//        }
-//        return searchRequestDto;
-//    }
-
     private Member checkGetReportBoardMember(String category, String githubId) {
         if (Category.BD3.equals(Category.of(category))) {
             if (githubId == null || githubId.isEmpty()) {
@@ -191,6 +187,13 @@ public class BoardService {
             BoardFile boardFile = BoardFile.builder().board(board).originalName(originalName).fileUrl(fileUrl).build();
             boardFileRepository.save(boardFile);
         }
+    }
+
+    private List<BoardFileRespDto> getFileList(Long boardId) {
+        List<BoardFile> boardFiles = boardFileRepository.findByBoardId(boardId);
+        return (boardFiles.isEmpty())
+                ? Collections.emptyList()
+                : boardFiles.stream().map(BoardFileRespDto::new).toList();
     }
 
     private String uploadFileUrl(MultipartFile file) {
