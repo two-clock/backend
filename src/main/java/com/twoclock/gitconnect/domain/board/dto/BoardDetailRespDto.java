@@ -1,5 +1,9 @@
 package com.twoclock.gitconnect.domain.board.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.member.dto.MemberLoginRespDto;
 
@@ -12,7 +16,9 @@ public record BoardDetailRespDto(
         String content,
         String nickname,
         String category,
-        String createdDateTime,
+        @JsonSerialize(using = LocalDateTimeSerializer.class)
+        @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+        LocalDateTime createdDateTime,
         MemberLoginRespDto member,
         List<BoardFileRespDto> fileList
 ) {
@@ -23,7 +29,7 @@ public record BoardDetailRespDto(
                 board.getContent(),
                 board.getMember().getName(),
                 board.getCategory().name(),
-                String.valueOf(board.getCreatedDateTime()),
+                board.getCreatedDateTime(),
                 MemberLoginRespDto.of(board.getMember()),
                 fileList
         );
