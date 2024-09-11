@@ -139,10 +139,12 @@ public class ChatRoomService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_CHAT_ROOM));
 
         return new ChatRoomRespDto(
+                chatRoom.getId(),
+                chatRoom.getChatRoomId(),
                 otherMember.getLogin(),
                 otherMember.getAvatarUrl(),
-                lastMessage.getMessage(),
-                lastMessage.getCreatedDateTime()
+                lastMessage != null ? lastMessage.getMessage() : null,
+                lastMessage != null ? lastMessage.getCreatedDateTime() : chatRoom.getCreatedDateTime()
         );
     }
 }
