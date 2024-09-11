@@ -31,9 +31,9 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
 
     @Transactional
-    public void createChatRoom(String createdGitHubId, String receiveGitHubId) {
-        Member createdMember = validateMemberByGitHubId(createdGitHubId);
-        Member receiveMember = validateMemberByGitHubId(receiveGitHubId);
+    public void createChatRoom(String githubId, String receiveLogin) {
+        Member createdMember = validateMemberByGitHubId(githubId);
+        Member receiveMember = validateMemberByLogin(receiveLogin);
 
         String chatRoomId = generateChatRoomId(createdMember.getGitHubId(), receiveMember.getGitHubId());
 
@@ -93,6 +93,12 @@ public class ChatRoomService {
 
     private Member validateMemberByGitHubId(String gitHubId) {
         return memberRepository.findByGitHubId(gitHubId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+        );
+    }
+
+    private Member validateMemberByLogin(String login) {
+        return memberRepository.findByLogin(login).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
     }
