@@ -3,6 +3,8 @@ package com.twoclock.gitconnect.domain.comment.entity;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.global.entity.BaseEntity;
+import com.twoclock.gitconnect.global.exception.CustomException;
+import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -51,5 +53,11 @@ public class Comment extends BaseEntity {
 
     public void update(String content) {
         this.content = content;
+    }
+
+    public void checkUserId(Long userKey) {
+        if(userKey.longValue() != this.member.getId().longValue()) {
+            throw new CustomException(ErrorCode.DIFF_USER_COMMENT);
+        }
     }
 }
