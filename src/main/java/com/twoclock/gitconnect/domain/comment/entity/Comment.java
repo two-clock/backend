@@ -56,7 +56,7 @@ public class Comment extends BaseEntity {
     }
 
     public void checkUserId(Long userKey) {
-        if(userKey.longValue() != this.member.getId().longValue()) {
+        if(!userKey.equals(this.member.getId())) {
             throw new CustomException(ErrorCode.DIFF_USER_COMMENT);
         }
     }
