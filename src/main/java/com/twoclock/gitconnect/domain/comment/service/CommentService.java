@@ -53,6 +53,7 @@ public class CommentService {
         filteringBadWord(dto.content());
         Member member = validateMember(githubId);
         Comment comment = validateComment(commentId);
+        comment.checkUserId(member.getId());
 
         comment.update(dto.content());
     }
@@ -61,6 +62,7 @@ public class CommentService {
     public void deleteComment(String githubId, Long commentId) {
         Member member = validateMember(githubId);
         Comment comment = validateComment(commentId);
+        comment.checkUserId(member.getId());
 
         commentRepository.delete(comment);
     }

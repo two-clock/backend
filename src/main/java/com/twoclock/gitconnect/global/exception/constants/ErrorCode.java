@@ -41,6 +41,7 @@ public enum ErrorCode {
     NOT_FOUND_LIKE(HttpStatus.BAD_REQUEST, "L-002", "좋아요를 누른 게시글을 찾을 수 없습니다."),
 
     NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "CM-001", "찾을 수 없는 댓글입니다."),
+    DIFF_USER_COMMENT(HttpStatus.FORBIDDEN, "CM-002", "댓글을 등록한 사용자와 일치하지 않습니다."),
 
     BAD_WORD(HttpStatus.BAD_REQUEST, "W-001", "금지어가 포함되어 있습니다."),
 

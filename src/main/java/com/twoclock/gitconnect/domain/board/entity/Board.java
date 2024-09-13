@@ -60,7 +60,7 @@ public class Board extends BaseEntity {
 
     // 게시판 작성 본인 검증 Method
     public void checkUserId(Long userKey) {
-        if (userKey.longValue() != this.member.getId().longValue()) {
+        if(!userKey.equals(this.member.getId())) {
             throw new CustomException(ErrorCode.DIFF_USER_BOARD);
         }
     }
