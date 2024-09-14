@@ -102,7 +102,7 @@ public class BoardService {
     }
 
     @Cacheable(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "redisCacheManager")
-    @Transactional
+    @Transactional(readOnly = true)
     public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
         List<BoardFileRespDto> fileList = getFileList(boardId);
@@ -113,8 +113,12 @@ public class BoardService {
                 throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
             }
         }
-        board.addViewCount();
         return new BoardDetailRespDto(board, fileList);
+    }
+
+    @Transactional
+    public void addViewCountBoards(Long boardId){
+        boardRepository.addViewCount(boardId);
     }
 
     @Transactional(readOnly = true)
