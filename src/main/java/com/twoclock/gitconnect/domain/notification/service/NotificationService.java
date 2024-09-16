@@ -4,6 +4,7 @@ import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.domain.notification.dto.NotificationRespDto;
 import com.twoclock.gitconnect.domain.notification.entity.Notification;
+import com.twoclock.gitconnect.domain.notification.entity.constants.NotificationType;
 import com.twoclock.gitconnect.domain.notification.repository.NotificationRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
@@ -25,42 +26,60 @@ public class NotificationService {
     private final MemberRepository memberRepository;
 
     private final Map<Member, List<DeferredResult<List<NotificationRespDto>>>> waitingUsers = new ConcurrentHashMap<>();
-    private final Long NOTIFY_TIME_OUT = 60000L;
 
     @Transactional(readOnly = true)
     public DeferredResult<List<NotificationRespDto>> getNotificationList(String githubId) {
-        DeferredResult<List<NotificationRespDto>> deferredResult = new DeferredResult<>(NOTIFY_TIME_OUT);
+        DeferredResult<List<NotificationRespDto>> deferredResult = new DeferredResult<>(60000L);
 
         Member member = validateMember(githubId);
         List<Notification> notifications = notificationRepository.findByMemberAndIsReadFalse(member);
         if (!notifications.isEmpty()) {
-            // 새로운 알림이 있으면 바로 응답
+            System.out.println("새로운 알림이 있으면 바로 응답");
             deferredResult.setResult(toMapNotificationResp(notifications));
         } else {
-            // 새로운 알림이 없으면 대기 목록에 추가
+            System.out.println("새로운 알림이 없으면 대기 목록에 추가");
             waitingUsers.computeIfAbsent(member, k -> new ArrayList<>()).add(deferredResult);
         }
 
         deferredResult.onTimeout(() -> {
-            // 빈 List 반환
+            System.out.println("타임 아웃으로 인한 빈 알람 반환");
             deferredResult.setResult(new ArrayList<>());
             removeWaitingUser(member, deferredResult);
         });
 
-        // 요청이 완료되면 대기 목록에서 제거
+        System.out.println("요청이 완료되면 대기 목록에서 제거");
         deferredResult.onCompletion(() -> removeWaitingUser(member, deferredResult));
 
         return deferredResult;
     }
 
-    // TODO : 댓글, 게시글, 사용자 신고 알림 생성
     @Transactional
-    public void notifyUser(Member member) {
+    public void addCommentNotification(Member member) {
+        Notification notification = Notification.builder()
+                .member(member)
+                .type(NotificationType.COMMENT)
+                .message(member.getLogin() + NotificationType.COMMENT.getMessage())
+                .build();
+        notificationRepository.save(notification);
+        notifyUser(member);
+    }
+
+    private void notifyUser(Member member) {
         List<Notification> notifications = notificationRepository.findByMemberAndIsReadFalse(member);
-        List<DeferredResult<List<NotificationRespDto>>> userDeferredResults = waitingUsers.remove(member);
+        List<DeferredResult<List<NotificationRespDto>>> userDeferredResults = getAllDeferredResults();
         if (!userDeferredResults.isEmpty()) {
-            userDeferredResults.forEach(r -> r.setResult(toMapNotificationResp(notifications)));
+            userDeferredResults.forEach(r -> {
+                r.setResult(toMapNotificationResp(notifications));
+            });
         }
+    }
+
+    private List<DeferredResult<List<NotificationRespDto>>> getAllDeferredResults() {
+        List<DeferredResult<List<NotificationRespDto>>> allDeferredResults = new ArrayList<>();
+        for (List<DeferredResult<List<NotificationRespDto>>> deferredResults : waitingUsers.values()) {
+            allDeferredResults.addAll(deferredResults);
+        }
+        return allDeferredResults;
     }
 
     private Member validateMember(String githubId) {
@@ -74,9 +93,11 @@ public class NotificationService {
     private void removeWaitingUser(Member member, DeferredResult<List<NotificationRespDto>> deferredResult) {
         List<DeferredResult<List<NotificationRespDto>>> results = waitingUsers.get(member);
         if (results != null) {
+            System.out.println("대기 목록에서 제거 시도: " + member.getLogin());
             results.remove(deferredResult);
             if (results.isEmpty()) {
                 waitingUsers.remove(member);
+                System.out.println("대기 목록에서 사용자 제거됨: " + member.getLogin());
             }
         }
     }
