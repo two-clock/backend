@@ -59,6 +59,7 @@ public class BoardController {
                                        @Nullable @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails == null ? null : userDetails.getUsername();
         BoardDetailRespDto result = boardService.getBoardDetail(boardId, githubId);
+        boardService.addViewCountBoards(boardId);
         return new RestResponse(result);
     }
 
