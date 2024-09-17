@@ -8,6 +8,8 @@ import com.twoclock.gitconnect.domain.chat.repository.ChatMessageRepository;
 import com.twoclock.gitconnect.domain.chat.repository.ChatRoomRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
+import com.twoclock.gitconnect.domain.notification.entity.constants.NotificationType;
+import com.twoclock.gitconnect.domain.notification.service.NotificationService;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public ChatMessageSaveRespDto sendMessage(String gitHubId, String chatRoomId, ChatMessageSaveReqDto chatMessageSaveReqDto) {
@@ -36,6 +39,7 @@ public class ChatMessageService {
                 .createdDateTime(LocalDateTime.now())
                 .build();
         chatMessageRepository.save(chatMessage);
+        notificationService.addNotificationInfo(member, NotificationType.CHAT);
 
         return new ChatMessageSaveRespDto(
                 chatMessage.getSenderMember().getLogin(),
