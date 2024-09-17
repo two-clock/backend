@@ -56,11 +56,11 @@ public class NotificationService {
     }
 
     @Transactional
-    public void addCommentNotification(Member member) {
+    public void addNotificationInfo(Member member, NotificationType type) {
         Notification notification = Notification.builder()
                 .member(member)
-                .type(NotificationType.COMMENT)
-                .message(member.getLogin() + NotificationType.COMMENT.getMessage())
+                .type(type)
+                .message(member.getLogin() + type.getMessage())
                 .build();
         notificationRepository.save(notification);
         notifyUser(member);

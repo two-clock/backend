@@ -9,6 +9,7 @@ import com.twoclock.gitconnect.domain.comment.entity.Comment;
 import com.twoclock.gitconnect.domain.comment.repository.CommentRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
+import com.twoclock.gitconnect.domain.notification.entity.constants.NotificationType;
 import com.twoclock.gitconnect.domain.notification.service.NotificationService;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
@@ -48,7 +49,7 @@ public class CommentService {
                 .content(dto.content())
                 .build();
         commentRepository.save(comment);
-        notificationService.addCommentNotification(member);
+        notificationService.addNotificationInfo(member, NotificationType.COMMENT);
     }
 
     @Transactional
