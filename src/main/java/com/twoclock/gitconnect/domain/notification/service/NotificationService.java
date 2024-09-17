@@ -27,12 +27,19 @@ public class NotificationService {
 
     private final Map<Member, List<DeferredResult<List<NotificationRespDto>>>> waitingUsers = new ConcurrentHashMap<>();
 
+    @Transactional(readOnly = true)
+    public List<NotificationRespDto> getNotificationInfo(String githubId) {
+        Member member = validateMember(githubId);
+        List<Notification> notifications = notificationRepository.findByMemberOrderByCreatedDateTimeDesc(member);
+        return toMapNotificationResp(notifications);
+    }
+
     @Transactional
     public DeferredResult<List<NotificationRespDto>> getNotificationList(String githubId) {
         DeferredResult<List<NotificationRespDto>> deferredResult = new DeferredResult<>(60000L);
 
         Member member = validateMember(githubId);
-        List<Notification> notifications = notificationRepository.findByMemberAndIsSentFalse(member);
+        List<Notification> notifications = notificationRepository.findByMemberAndIsSentFalseOrderByCreatedDateTimeDesc(member);
         System.out.println("알림 목록 조회: " + notifications.size());
 
         if (!notifications.isEmpty()) {
@@ -67,7 +74,7 @@ public class NotificationService {
     }
 
     private void notifyUser(Member member) {
-        List<Notification> notifications = notificationRepository.findByMemberAndIsSentFalse(member);
+        List<Notification> notifications = notificationRepository.findByMemberAndIsSentFalseOrderByCreatedDateTimeDesc(member);
         if (!notifications.isEmpty()) {
             System.out.println("알림 전송 후 알림 상태 변경");
             notifications.forEach(n -> n.setSent(true));

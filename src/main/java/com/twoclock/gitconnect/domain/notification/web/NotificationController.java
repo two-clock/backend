@@ -20,6 +20,12 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    @GetMapping("/list")
+    public RestResponse getNotificationInfo(@AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        List<NotificationRespDto> result = notificationService.getNotificationInfo(githubId);
+        return new RestResponse(result);
+    }
 
     @GetMapping
     public DeferredResult<List<NotificationRespDto>> getNotificationList(@AuthenticationPrincipal UserDetails userDetails) {
