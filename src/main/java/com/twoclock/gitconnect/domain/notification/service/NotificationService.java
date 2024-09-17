@@ -27,12 +27,14 @@ public class NotificationService {
 
     private final Map<Member, List<DeferredResult<List<NotificationRespDto>>>> waitingUsers = new ConcurrentHashMap<>();
 
-    @Transactional(readOnly = true)
+    @Transactional
     public DeferredResult<List<NotificationRespDto>> getNotificationList(String githubId) {
         DeferredResult<List<NotificationRespDto>> deferredResult = new DeferredResult<>(60000L);
 
         Member member = validateMember(githubId);
-        List<Notification> notifications = notificationRepository.findByMemberAndIsReadFalse(member);
+        List<Notification> notifications = notificationRepository.findByMemberAndIsSentFalse(member);
+        System.out.println("알림 목록 조회: " + notifications.size());
+
         if (!notifications.isEmpty()) {
             System.out.println("새로운 알림이 있으면 바로 응답");
             deferredResult.setResult(toMapNotificationResp(notifications));
@@ -65,10 +67,17 @@ public class NotificationService {
     }
 
     private void notifyUser(Member member) {
-        List<Notification> notifications = notificationRepository.findByMemberAndIsReadFalse(member);
+        List<Notification> notifications = notificationRepository.findByMemberAndIsSentFalse(member);
+        if (!notifications.isEmpty()) {
+            System.out.println("알림 전송 후 알림 상태 변경");
+            notifications.forEach(n -> n.setSent(true));
+            notificationRepository.saveAll(notifications);
+        }
+
         List<DeferredResult<List<NotificationRespDto>>> userDeferredResults = getAllDeferredResults();
         if (!userDeferredResults.isEmpty()) {
             userDeferredResults.forEach(r -> {
+                System.out.println("대기중인 알림 객체에게 알림 전송");
                 r.setResult(toMapNotificationResp(notifications));
             });
         }
