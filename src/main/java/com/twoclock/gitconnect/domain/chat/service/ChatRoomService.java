@@ -79,6 +79,7 @@ public class ChatRoomService {
                 .stream()
                 .map(chatRoomMessage -> new ChatMessageRespDto(
                         chatRoomMessage.getSenderMember().getLogin(),
+                        chatRoomMessage.getSenderMember().getGitHubId(),
                         chatRoomMessage.getMessage(),
                         chatRoomMessage.getCreatedDateTime()
                 ))

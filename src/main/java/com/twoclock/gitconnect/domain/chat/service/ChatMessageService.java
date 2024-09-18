@@ -35,13 +35,14 @@ public class ChatMessageService {
                 .message(chatMessageSaveReqDto.message())
                 .createdDateTime(LocalDateTime.now())
                 .build();
-        chatMessageRepository.save(chatMessage);
+
+        ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
 
         return new ChatMessageSaveRespDto(
-                chatMessage.getSenderMember().getLogin(),
-                chatMessage.getSenderMember().getGitHubId(),
-                chatMessage.getMessage(),
-                chatMessage.getCreatedDateTime()
+                savedMessage.getSenderMember().getLogin(),
+                savedMessage.getSenderMember().getGitHubId(),
+                savedMessage.getMessage(),
+                savedMessage.getCreatedDateTime()
         );
     }
 
