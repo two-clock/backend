@@ -16,8 +16,8 @@ public record BoardDetailRespDto(
         String content,
         String nickname,
         String category,
-        Long viewCount,
-        Long likeCount,
+        long viewCount,
+        long likeCount,
         @JsonSerialize(using = LocalDateTimeSerializer.class)
         @JsonDeserialize(using = LocalDateTimeDeserializer.class)
         LocalDateTime createdDateTime,
