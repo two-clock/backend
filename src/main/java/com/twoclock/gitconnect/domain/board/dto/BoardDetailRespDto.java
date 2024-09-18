@@ -16,19 +16,23 @@ public record BoardDetailRespDto(
         String content,
         String nickname,
         String category,
+        Long viewCount,
+        Long likeCount,
         @JsonSerialize(using = LocalDateTimeSerializer.class)
         @JsonDeserialize(using = LocalDateTimeDeserializer.class)
         LocalDateTime createdDateTime,
         MemberLoginRespDto member,
         List<BoardFileRespDto> fileList
 ) {
-    public BoardDetailRespDto(Board board, List<BoardFileRespDto> fileList) {
+    public BoardDetailRespDto(Board board, Long likeCount, List<BoardFileRespDto> fileList) {
         this(
                 board.getId(),
                 board.getTitle(),
                 board.getContent(),
                 board.getMember().getName(),
                 board.getCategory().name(),
+                board.getViewCount(),
+                likeCount,
                 board.getCreatedDateTime(),
                 MemberLoginRespDto.of(board.getMember()),
                 fileList
