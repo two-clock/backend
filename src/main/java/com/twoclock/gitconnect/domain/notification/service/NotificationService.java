@@ -35,6 +35,14 @@ public class NotificationService {
     }
 
     @Transactional
+    public void readNotification(Long notificationId, String githubId) {
+        Member member = validateMember(githubId);
+        Notification notification = validateNotification(notificationId, member);
+        notification.setRead(true);
+        notificationRepository.save(notification);
+    }
+
+    @Transactional(readOnly = true)
     public DeferredResult<List<NotificationRespDto>> getNotificationList(String githubId) {
         DeferredResult<List<NotificationRespDto>> deferredResult = new DeferredResult<>(60000L);
 
@@ -100,6 +108,15 @@ public class NotificationService {
 
     private Member validateMember(String githubId) {
         return memberRepository.findByGitHubId(githubId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
+    }
+
+    private Notification validateNotification(Long notificationId, Member member) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NOTIFICATION));
+        if (!notification.getMember().equals(member)) {
+            throw new CustomException(ErrorCode.NOT_MATCH_MEMBER);
+        }
+        return notification;
     }
 
     private List<NotificationRespDto> toMapNotificationResp(List<Notification> notifications) {
