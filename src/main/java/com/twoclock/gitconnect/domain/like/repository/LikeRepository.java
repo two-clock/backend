@@ -16,4 +16,6 @@ public interface LikeRepository extends JpaRepository<Likes, Long>, CustomLikeRe
     Optional<Likes> findByBoardAndMember(Board board, Member member);
 
     Page<Likes> findAllByBoard(Board board, Pageable pageable);
+
+    Long countByBoard(Board board);
 }
