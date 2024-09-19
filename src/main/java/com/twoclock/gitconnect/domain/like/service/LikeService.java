@@ -47,7 +47,10 @@ public class LikeService {
                 .member(member)
                 .build();
         likeRepository.save(likes);
-        notificationService.addNotificationInfo(member, NotificationType.LIKES);
+
+        if(!board.getMember().equals(member)) {
+            notificationService.addNotificationInfo(member, NotificationType.LIKES);
+        }
     }
 
     @Transactional

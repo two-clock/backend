@@ -49,7 +49,10 @@ public class CommentService {
                 .content(dto.content())
                 .build();
         commentRepository.save(comment);
-        notificationService.addNotificationInfo(member, NotificationType.COMMENT);
+
+        if (!board.getMember().equals(member)) {
+            notificationService.addNotificationInfo(member, NotificationType.COMMENT);
+        }
     }
 
     @Transactional

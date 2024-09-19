@@ -39,7 +39,9 @@ public class ChatMessageService {
                 .createdDateTime(LocalDateTime.now())
                 .build();
         chatMessageRepository.save(chatMessage);
-        notificationService.addNotificationInfo(member, NotificationType.CHAT);
+        if(!chatMessage.getSenderMember().equals(member)) {
+            notificationService.addNotificationInfo(member, NotificationType.CHAT);
+        }
 
         return new ChatMessageSaveRespDto(
                 chatMessage.getSenderMember().getLogin(),
