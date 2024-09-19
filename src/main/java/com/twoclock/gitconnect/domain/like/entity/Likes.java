@@ -35,9 +35,9 @@ public class Likes {
     private LocalDateTime createdDateTime;
 
     @Builder
-    public Likes(Board board, Member member) {
+    public Likes(Board board, Member member, LocalDateTime createdDateTime) {
         this.board = board;
         this.member = member;
+        this.createdDateTime = createdDateTime;
     }
-
 }

@@ -33,7 +33,8 @@ public class WebSecurityConfig {
             "/api/v1/boards",
             "/api/v1/boards/*",
             "/api/v1/boards/*/comments",
-            "/api/v1/likes/*"
+            "/api/v1/likes/*",
+            "/api/v1/likes/popular-week/*",
     };
     private static final String[] POST_PERMIT_STRINGS = {
             "/api/v1/members/auth/logout",
