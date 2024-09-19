@@ -38,6 +38,7 @@ public class LikeService {
     public void addLikeToBoard(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
         Member member = validateMember(githubId);
+
         boolean duplicated = likeRepository.existsByBoardAndMember(board, member);
         if (duplicated) {
             throw new CustomException(ErrorCode.DUPLICATED_LIKE);
@@ -46,7 +47,9 @@ public class LikeService {
         Likes likes = Likes.builder()
                 .board(board)
                 .member(member)
+                .createdDateTime(LocalDateTime.now())
                 .build();
+
         likeRepository.save(likes);
     }
 

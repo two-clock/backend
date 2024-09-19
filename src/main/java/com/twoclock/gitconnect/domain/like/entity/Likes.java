@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -30,7 +29,6 @@ public class Likes {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdDateTime;
 
