@@ -10,6 +10,7 @@ import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.board.repository.BoardCacheRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardFileRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
+import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
@@ -47,6 +48,7 @@ public class BoardService {
     private static final List<String> PERMIT_BOARD_IMAGE_TYPE = List.of(
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/bmp", "image/webp"
     );
+    private final LikeRepository likeRepository;
 
     @Transactional
     public BoardRespDto saveBoard(BoardSaveReqDto boardSaveReqDto, String githubId, MultipartFile[] files) {
@@ -105,6 +107,7 @@ public class BoardService {
     @Transactional(readOnly = true)
     public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
+        Long likeCount = likeRepository.countByBoard(board);
         List<BoardFileRespDto> fileList = getFileList(boardId);
 
         Member member = checkGetReportBoardMember(board.getCategory().name(), githubId);
@@ -113,11 +116,11 @@ public class BoardService {
                 throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
             }
         }
-        return new BoardDetailRespDto(board, fileList);
+        return new BoardDetailRespDto(board, likeCount, fileList);
     }
 
     @Transactional
-    public void addViewCountBoards(Long boardId){
+    public void addViewCountBoards(Long boardId) {
         boardRepository.addViewCount(boardId);
     }
 
