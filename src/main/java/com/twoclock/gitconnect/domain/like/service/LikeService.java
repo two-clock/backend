@@ -72,6 +72,18 @@ public class LikeService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public Boolean getLikeByBoardId(Long boardId, String gitHubId) {
+        if (gitHubId == null) {
+            return Boolean.FALSE;
+        }
+
+        Board board = validateBoard(boardId);
+        Member member = validateMember(gitHubId);
+
+        return likeRepository.existsByBoardAndMember(board, member);
+    }
+
     private Board validateBoard(Long boardId) {
         return boardRepository.findById(boardId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
