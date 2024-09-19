@@ -45,7 +45,8 @@ public class DummyDevlnit {
             // 테스트 계정 생성
             List<Member> members = Arrays.asList(
                     new Member("loginId-1", "1234", faker.avatar().image(), "테스트 유저 1", ROLE_USER),
-                    new Member("loginId-2", "5678", faker.avatar().image(), "테스트 유저 2", ROLE_USER)
+                    new Member("loginId-2", "5678", faker.avatar().image(), "테스트 유저 2", ROLE_USER),
+                    new Member("loginId-3", "0000", faker.avatar().image(), "테스트 유저 3", ROLE_USER)
             );
             memberRepository.saveAll(members);
 
@@ -53,7 +54,8 @@ public class DummyDevlnit {
             List<Board> boards = new ArrayList<>();
             createDummyBoards(boards, "계정 홍보 테스트 게시글", Category.BD1, 50, members.get(0));
             createDummyBoards(boards, "계정 홍보 테스트 게시글2", Category.BD1, 50, members.get(1));
-            createDummyBoards(boards, "저장소 홍보 테스트 게시글", Category.BD2, 100, members.get(0));
+            createDummyBoards(boards, "저장소 홍보 테스트 게시글", Category.BD2, 50, members.get(0));
+            createDummyBoards(boards, "저장소 홍보 테스트 게시글2", Category.BD2, 50, members.get(1));
             createDummyBoards(boards, "사용자 신고 테스트 게시글", Category.BD3, 100, members.get(0));
             boardRepository.saveAll(boards);
 
@@ -69,6 +71,10 @@ public class DummyDevlnit {
                     .forEach(i -> createDummyLike(likes, members.get(1), boards.get(i), LocalDateTime.now()));
             IntStream.range(50, 60)
                     .forEach(i -> createDummyLike(likes, members.get(0), boards.get(i), LocalDateTime.now()));
+
+            createDummyLike(likes, members.get(0), boards.get(150), LocalDateTime.now());
+            createDummyLike(likes, members.get(1), boards.get(100), LocalDateTime.now());
+            createDummyLike(likes, members.get(2), boards.get(100), LocalDateTime.now());
 
             likeRepository.saveAll(likes);
 

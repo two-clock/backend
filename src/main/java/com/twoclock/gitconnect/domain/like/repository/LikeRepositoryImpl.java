@@ -3,7 +3,9 @@ package com.twoclock.gitconnect.domain.like.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
 import com.twoclock.gitconnect.domain.like.dto.LikePopularWeekMemberRespDto;
+import com.twoclock.gitconnect.domain.like.dto.LikePopularWeekRepositoryRespDto;
 import com.twoclock.gitconnect.domain.like.dto.QLikePopularWeekMemberRespDto;
+import com.twoclock.gitconnect.domain.like.dto.QLikePopularWeekRepositoryRespDto;
 import jakarta.persistence.EntityManager;
 
 import java.time.LocalDateTime;
@@ -33,6 +35,25 @@ public class LikeRepositoryImpl implements CustomLikeRepository {
                         .and(board.category.eq(Category.BD1))
                 )
                 .groupBy(member.id)
+                .orderBy(likes.count().desc())
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<LikePopularWeekRepositoryRespDto> findTopRepositoryByLikesBetween(
+            LocalDateTime startDateTime, LocalDateTime endDateTime, int limit
+    ) {
+        return queryFactory.select(
+                        new QLikePopularWeekRepositoryRespDto(board.title, board.content, member.login, likes.count())
+                )
+                .from(likes)
+                .join(likes.board, board)
+                .join(board.member, member)
+                .where(likes.createdDateTime.between(startDateTime, endDateTime)
+                        .and(board.category.eq(Category.BD2))
+                )
+                .groupBy(board.title, board.content, member.login)
                 .orderBy(likes.count().desc())
                 .limit(limit)
                 .fetch();

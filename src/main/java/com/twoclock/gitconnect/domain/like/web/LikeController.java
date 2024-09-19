@@ -44,6 +44,11 @@ public class LikeController {
         return new RestResponse(likeService.getPopularWeekMember());
     }
 
+    @GetMapping("/popular-week/repositories")
+    public RestResponse getPopularWeekRepository() {
+        return new RestResponse(likeService.getPopularWeekRepository());
+    }
+
 //    @GetMapping("/{boardId}")
 //    public RestResponse getLikesByBoardId(@PathVariable("boardId") Long boardId,
 //                                          @RequestParam(value = "page", defaultValue = "0") int page,

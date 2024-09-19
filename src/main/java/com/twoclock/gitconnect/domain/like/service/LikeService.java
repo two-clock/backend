@@ -106,6 +106,21 @@ public class LikeService {
         return likeRepository.findTopMemberByLikesBetween(startOfWeekDateTime, endOfWeekDateTime, limit);
     }
 
+    @Transactional(readOnly = true)
+    public Object getPopularWeekRepository() {
+        LocalDate now = LocalDate.now();
+
+        LocalDate startOfWeek = now.with(DayOfWeek.MONDAY);
+        LocalDate endOfWeek = now.with(DayOfWeek.SUNDAY);
+
+        LocalDateTime startOfWeekDateTime = startOfWeek.atStartOfDay();
+        LocalDateTime endOfWeekDateTime = endOfWeek.atTime(23, 59, 59);
+
+        int limit = 10;
+
+        return likeRepository.findTopRepositoryByLikesBetween(startOfWeekDateTime, endOfWeekDateTime, limit);
+    }
+
     private Board validateBoard(Long boardId) {
         return boardRepository.findById(boardId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
