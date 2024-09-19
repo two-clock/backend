@@ -21,10 +21,10 @@ public class ChatRoomController {
     @PostMapping
     public RestResponse createChatRoom(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("receiveId") String receiveGitHubId
+            @RequestParam("receiveLogin") String receiveLogin
     ) {
-        String createdGitHubId = userDetails.getUsername();
-        chatRoomService.createChatRoom(createdGitHubId, receiveGitHubId);
+        String gitHubId = userDetails.getUsername();
+        chatRoomService.createChatRoom(gitHubId, receiveLogin);
         return RestResponse.OK();
     }
 
