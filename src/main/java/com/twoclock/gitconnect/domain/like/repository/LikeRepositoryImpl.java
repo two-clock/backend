@@ -45,7 +45,9 @@ public class LikeRepositoryImpl implements CustomLikeRepository {
             LocalDateTime startDateTime, LocalDateTime endDateTime, int limit
     ) {
         return queryFactory.select(
-                        new QLikePopularWeekRepositoryRespDto(board.title, board.content, member.login, likes.count())
+                        new QLikePopularWeekRepositoryRespDto(
+                                board.id, board.title, board.content, member.login, likes.count()
+                        )
                 )
                 .from(likes)
                 .join(likes.board, board)
@@ -53,7 +55,7 @@ public class LikeRepositoryImpl implements CustomLikeRepository {
                 .where(likes.createdDateTime.between(startDateTime, endDateTime)
                         .and(board.category.eq(Category.BD2))
                 )
-                .groupBy(board.title, board.content, member.login)
+                .groupBy(board.id, board.title, board.content, member.login)
                 .orderBy(likes.count().desc())
                 .limit(limit)
                 .fetch();
