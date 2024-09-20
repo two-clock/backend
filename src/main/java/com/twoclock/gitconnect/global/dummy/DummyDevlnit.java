@@ -11,6 +11,7 @@ import com.twoclock.gitconnect.domain.notification.entity.Notification;
 import com.twoclock.gitconnect.domain.notification.entity.constants.NotificationType;
 import com.twoclock.gitconnect.domain.notification.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
+import net.datafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,11 +36,12 @@ public class DummyDevlnit {
                            NotificationRepository notificationRepository) {
         return (args) -> {
             log.info("Dummy Data Init");
+            Faker faker = new Faker();
 
             // 테스트 계정 생성
             List<Member> members = Arrays.asList(
-                    new Member("loginId-1", "1234", "/uploads/profile/test1.jpg", "테스트 유저 1", ROLE_USER),
-                    new Member("loginId-2", "5678", "/uploads/profile/test2.jpg", "테스트 유저 2", ROLE_USER)
+                    new Member("loginId-1", "1234", faker.avatar().image(), "테스트 유저 1", ROLE_USER),
+                    new Member("loginId-2", "5678", faker.avatar().image(), "테스트 유저 2", ROLE_USER)
             );
             memberRepository.saveAll(members);
 
