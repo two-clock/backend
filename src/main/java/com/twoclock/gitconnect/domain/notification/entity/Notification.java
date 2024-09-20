@@ -28,12 +28,22 @@ public class Notification extends BaseEntity {
 
     private String message;
 
-    private final boolean isRead = false;
+    private boolean isRead = false;
+
+    private boolean isSent = false;
 
     @Builder
     public Notification(Member member, NotificationType type, String message) {
         this.member = member;
         this.type = type;
         this.message = message;
+    }
+
+    public void setSent(boolean isSent) {
+        this.isSent = isSent;
+    }
+
+    public void setRead(boolean isRead) {
+        this.isRead = isRead;
     }
 }

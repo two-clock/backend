@@ -7,6 +7,8 @@ import com.twoclock.gitconnect.domain.like.entity.Likes;
 import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
+import com.twoclock.gitconnect.domain.notification.entity.constants.NotificationType;
+import com.twoclock.gitconnect.domain.notification.service.NotificationService;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.global.model.Pagination;
@@ -29,6 +31,7 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public void addLikeToBoard(Long boardId, String githubId) {
@@ -44,6 +47,10 @@ public class LikeService {
                 .member(member)
                 .build();
         likeRepository.save(likes);
+
+        if(!board.getMember().equals(member)) {
+            notificationService.addNotificationInfo(member, NotificationType.LIKES);
+        }
     }
 
     @Transactional

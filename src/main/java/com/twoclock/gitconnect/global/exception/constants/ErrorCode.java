@@ -23,6 +23,9 @@ public enum ErrorCode {
     NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "M-001", "찾을 수 없는 회원 계정입니다."),
     DIFF_USER_BOARD(HttpStatus.FORBIDDEN, "M-002", "게시글을 등록한 사용자와 일치하지 않습니다."),
 
+    NOT_FOUND_NOTIFICATION(HttpStatus.NOT_FOUND, "N-001", "찾을 수 없는 알림입니다."),
+    NOT_MATCH_MEMBER(HttpStatus.FORBIDDEN, "N-002", "알림을 읽을 수 있는 권한이 없습니다."),
+
     NOT_FOUND_CATEGORY(HttpStatus.NOT_FOUND, "C-001", "찾을 수 없는 카테고리입니다."),
 
     OPEN_API_SERVER_ERROR(HttpStatus.BAD_REQUEST, "G-001", "Open API 서버 에러가 발생했습니다."),
