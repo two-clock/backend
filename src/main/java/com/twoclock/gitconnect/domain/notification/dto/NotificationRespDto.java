@@ -7,13 +7,15 @@ import java.time.LocalDateTime;
 public record NotificationRespDto(
         Long id,
         String message,
-        LocalDateTime createdDateTime
+        LocalDateTime createdDateTime,
+        boolean isRead
 ) {
     public NotificationRespDto(Notification notification) {
         this(
                 notification.getId(),
                 notification.getMessage(),
-                notification.getCreatedDateTime()
+                notification.getCreatedDateTime(),
+                notification.isRead()
         );
     }
 }

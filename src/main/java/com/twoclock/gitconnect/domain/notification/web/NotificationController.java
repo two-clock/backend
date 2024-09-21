@@ -6,10 +6,7 @@ import com.twoclock.gitconnect.global.model.RestResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.List;
@@ -20,11 +17,24 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    @GetMapping("/list")
+    public RestResponse getNotificationInfo(@AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        List<NotificationRespDto> result = notificationService.getNotificationInfo(githubId);
+        return new RestResponse(result);
+    }
+
+    @PutMapping("{notificationId}")
+    public RestResponse readNotification(@PathVariable Long notificationId,
+                                         @AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        notificationService.readNotification(notificationId, githubId);
+        return RestResponse.OK();
+    }
 
     @GetMapping
-    public RestResponse getNotificationList(@AuthenticationPrincipal UserDetails userDetails) {
+    public DeferredResult<List<NotificationRespDto>> getNotificationList(@AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();
-        DeferredResult<List<NotificationRespDto>> result = notificationService.getNotificationList(githubId);
-        return new RestResponse(result);
+        return notificationService.getNotificationList(githubId);
     }
 }
