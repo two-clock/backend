@@ -7,15 +7,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 public class Likes {
 
     @Id
@@ -30,14 +27,13 @@ public class Likes {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdDateTime;
 
     @Builder
-    public Likes(Board board, Member member) {
+    public Likes(Board board, Member member, LocalDateTime createdDateTime) {
         this.board = board;
         this.member = member;
+        this.createdDateTime = createdDateTime;
     }
-
 }

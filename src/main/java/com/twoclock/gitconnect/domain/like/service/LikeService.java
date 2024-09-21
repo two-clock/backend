@@ -2,6 +2,7 @@ package com.twoclock.gitconnect.domain.like.service;
 
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
+import com.twoclock.gitconnect.domain.like.dto.LikePopularWeekMemberRespDto;
 import com.twoclock.gitconnect.domain.like.dto.LikesRespDto;
 import com.twoclock.gitconnect.domain.like.entity.Likes;
 import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
@@ -22,6 +23,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,6 +41,7 @@ public class LikeService {
     public void addLikeToBoard(Long boardId, String githubId) {
         Board board = validateBoard(boardId);
         Member member = validateMember(githubId);
+
         boolean duplicated = likeRepository.existsByBoardAndMember(board, member);
         if (duplicated) {
             throw new CustomException(ErrorCode.DUPLICATED_LIKE);
@@ -45,7 +50,9 @@ public class LikeService {
         Likes likes = Likes.builder()
                 .board(board)
                 .member(member)
+                .createdDateTime(LocalDateTime.now())
                 .build();
+
         likeRepository.save(likes);
 
         if(!board.getMember().equals(member)) {
@@ -89,6 +96,36 @@ public class LikeService {
         Member member = validateMember(gitHubId);
 
         return likeRepository.existsByBoardAndMember(board, member);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LikePopularWeekMemberRespDto> getPopularWeekMember() {
+        LocalDate now = LocalDate.now();
+
+        LocalDate startOfWeek = now.with(DayOfWeek.MONDAY);
+        LocalDate endOfWeek = now.with(DayOfWeek.SUNDAY);
+
+        LocalDateTime startOfWeekDateTime = startOfWeek.atStartOfDay();
+        LocalDateTime endOfWeekDateTime = endOfWeek.atTime(23, 59, 59);
+
+        int limit = 5;
+
+        return likeRepository.findTopMemberByLikesBetween(startOfWeekDateTime, endOfWeekDateTime, limit);
+    }
+
+    @Transactional(readOnly = true)
+    public Object getPopularWeekRepository() {
+        LocalDate now = LocalDate.now();
+
+        LocalDate startOfWeek = now.with(DayOfWeek.MONDAY);
+        LocalDate endOfWeek = now.with(DayOfWeek.SUNDAY);
+
+        LocalDateTime startOfWeekDateTime = startOfWeek.atStartOfDay();
+        LocalDateTime endOfWeekDateTime = endOfWeek.atTime(23, 59, 59);
+
+        int limit = 10;
+
+        return likeRepository.findTopRepositoryByLikesBetween(startOfWeekDateTime, endOfWeekDateTime, limit);
     }
 
     private Board validateBoard(Long boardId) {
