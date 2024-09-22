@@ -10,6 +10,7 @@ import com.twoclock.gitconnect.global.model.RestResponse;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/boards")
 @RestController
@@ -45,18 +47,11 @@ public class BoardController {
         return RestResponse.OK();
     }
 
-//     TODO: 이걸 Search 기능으로 바꾸기
-//    @GetMapping
-//    public RestResponse getBoardList(@ModelAttribute @Valid SearchRequestDto searchRequestDto,
-//                                     @Nullable @AuthenticationPrincipal UserDetails userDetails) {
-//        String githubId = userDetails == null ? null : userDetails.getUsername();
-//        Page<SearchResponseDto> boardRespDto = boardService.getBoardList(searchRequestDto, githubId);
-//        return new RestResponse(boardRespDto);
-//    }
-
     @GetMapping("/{boardId}")
-    public RestResponse getBoardDetail(@PathVariable("boardId") Long boardId,
-                                       @Nullable @AuthenticationPrincipal UserDetails userDetails) {
+    public RestResponse getBoardDetail(
+            @PathVariable("boardId") Long boardId,
+            @AuthenticationPrincipal @Nullable UserDetails userDetails
+    ) {
         String githubId = userDetails == null ? null : userDetails.getUsername();
         BoardDetailRespDto result = boardService.getBoardDetail(boardId, githubId);
         boardService.addViewCountBoards(boardId);
@@ -80,7 +75,5 @@ public class BoardController {
         String githubId = userDetails.getUsername();
         boardService.deleteBoard(boardId, githubId);
         return RestResponse.OK();
-
     }
-
 }

@@ -18,8 +18,12 @@ public record MemberLoginRespDto(
         this.name = name;
     }
 
-    public static MemberLoginRespDto of(Member member) {
-        return new MemberLoginRespDto(member.getLogin(), member.getGitHubId(), member.getAvatarUrl(), member.getName());
+    public MemberLoginRespDto(Member member) {
+        this(
+                member.getLogin(),
+                member.getGitHubId(),
+                member.getAvatarUrl(),
+                member.getName()
+        );
     }
-
 }

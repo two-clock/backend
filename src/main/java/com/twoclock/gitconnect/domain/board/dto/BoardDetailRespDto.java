@@ -14,7 +14,6 @@ public record BoardDetailRespDto(
         Long id,
         String title,
         String content,
-        String nickname,
         String category,
         long viewCount,
         long likeCount,
@@ -24,18 +23,18 @@ public record BoardDetailRespDto(
         MemberLoginRespDto member,
         List<BoardFileRespDto> fileList
 ) {
-    public BoardDetailRespDto(Board board, Long likeCount, List<BoardFileRespDto> fileList) {
+
+    public BoardDetailRespDto(Board board) {
         this(
                 board.getId(),
                 board.getTitle(),
                 board.getContent(),
-                board.getMember().getName(),
                 board.getCategory().name(),
                 board.getViewCount(),
-                likeCount,
+                board.getLikeList().size(),
                 board.getCreatedDateTime(),
-                MemberLoginRespDto.of(board.getMember()),
-                fileList
+                new MemberLoginRespDto(board.getMember()),
+                board.getFileList().stream().map(BoardFileRespDto::new).toList()
         );
     }
 }

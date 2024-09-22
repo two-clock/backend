@@ -1,6 +1,7 @@
 package com.twoclock.gitconnect.domain.board.entity;
 
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
+import com.twoclock.gitconnect.domain.like.entity.Likes;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import com.twoclock.gitconnect.global.entity.BaseEntity;
 import com.twoclock.gitconnect.global.exception.CustomException;
@@ -13,6 +14,11 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -47,7 +53,13 @@ public class Board extends BaseEntity {
     private final boolean isView = true;
 
     @Column(nullable = false)
-    private Long viewCount = 0L;
+    private final Long viewCount = 0L;
+
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    private final List<BoardFile> fileList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    private final Set<Likes> likeList = new HashSet<>();
 
     @Builder
     public Board(Member member, String nickname, Category category, String title, String content) {
@@ -60,7 +72,7 @@ public class Board extends BaseEntity {
 
     // 게시판 작성 본인 검증 Method
     public void checkUserId(Long userKey) {
-        if(!userKey.equals(this.member.getId())) {
+        if (!userKey.equals(this.member.getId())) {
             throw new CustomException(ErrorCode.DIFF_USER_BOARD);
         }
     }
