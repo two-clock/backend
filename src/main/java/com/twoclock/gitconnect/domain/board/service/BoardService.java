@@ -1,9 +1,11 @@
 package com.twoclock.gitconnect.domain.board.service;
 
-import com.twoclock.gitconnect.domain.board.dto.*;
+import com.twoclock.gitconnect.domain.board.dto.BoardCacheDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardDetailRespDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardModifyReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardRequestDto.BoardSaveReqDto;
 import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
+import com.twoclock.gitconnect.domain.board.dto.BoardWithCategoryRespDto;
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.BoardFile;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
@@ -19,9 +21,8 @@ import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.global.s3.S3Service;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +31,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class BoardService {
@@ -94,29 +95,18 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public Page<SearchResponseDto> getBoardList(SearchRequestDto searchRequestDto, String githubId) {
-        Member member = checkGetReportBoardMember(searchRequestDto.category(), githubId);
-        if (member != null) {
-            searchRequestDto = searchRequestDto.changeUseMember(githubId, member.getRole().toString());
-        }
-        PageRequest pageRequest = searchRequestDto.toPageRequest();
-        return boardRepository.searchBoardList(searchRequestDto, pageRequest);
-    }
-
-    @Cacheable(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "redisCacheManager")
-    @Transactional(readOnly = true)
     public BoardDetailRespDto getBoardDetail(Long boardId, String githubId) {
-        Board board = validateBoard(boardId);
-        Long likeCount = likeRepository.countByBoard(board);
-        List<BoardFileRespDto> fileList = getFileList(boardId);
+        Board board = boardRepository.findBoardDetailById(boardId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BOARD));
 
-        Member member = checkGetReportBoardMember(board.getCategory().name(), githubId);
-        if (member != null) {
-            if (!Role.ROLE_ADMIN.equals(member.getRole()) && !member.getId().equals(board.getMember().getId())) {
+        if (board.getCategory().equals(Category.BD3)) {
+            Member member = validateMember(githubId);
+
+            if (member.getRole().equals(Role.ROLE_USER) && !member.getId().equals(board.getMember().getId())) {
                 throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
             }
         }
-        return new BoardDetailRespDto(board, likeCount, fileList);
+        return new BoardDetailRespDto(board);
     }
 
     @Transactional
@@ -174,16 +164,6 @@ public class BoardService {
         }
     }
 
-    private Member checkGetReportBoardMember(String category, String githubId) {
-        if (Category.BD3.equals(Category.of(category))) {
-            if (githubId == null || githubId.isEmpty()) {
-                throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
-            }
-            return validateMember(githubId);
-        }
-        return null;
-    }
-
     private void boardImageUpload(MultipartFile[] files, Board board) {
         if (files.length > 3) {
             throw new CustomException(ErrorCode.MANY_UPLOAD_IMAGES_BOARD);
@@ -194,13 +174,6 @@ public class BoardService {
             BoardFile boardFile = BoardFile.builder().board(board).originalName(originalName).fileUrl(fileUrl).build();
             boardFileRepository.save(boardFile);
         }
-    }
-
-    private List<BoardFileRespDto> getFileList(Long boardId) {
-        List<BoardFile> boardFiles = boardFileRepository.findByBoardId(boardId);
-        return (boardFiles.isEmpty())
-                ? Collections.emptyList()
-                : boardFiles.stream().map(BoardFileRespDto::new).toList();
     }
 
     private String uploadFileUrl(MultipartFile file) {

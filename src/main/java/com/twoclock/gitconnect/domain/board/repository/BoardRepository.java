@@ -10,7 +10,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 
-public interface BoardRepository extends JpaRepository<Board, Long>,
+import java.util.Optional;
+
+public interface BoardRepository extends
+        JpaRepository<Board, Long>,
         CustomBoardRepository,
         QuerydslPredicateExecutor<Board> {
 
@@ -26,4 +29,7 @@ public interface BoardRepository extends JpaRepository<Board, Long>,
     @Modifying
     @Query("UPDATE Board b SET b.viewCount = b.viewCount + 1 WHERE b.id = :boardId")
     void addViewCount(Long boardId);
+
+    @Query("select b from Board b join fetch b.member left join fetch b.fileList left join fetch b.likeList where b.id = :boardId")
+    Optional<Board> findBoardDetailById(@Param("boardId") Long boardId);
 }
