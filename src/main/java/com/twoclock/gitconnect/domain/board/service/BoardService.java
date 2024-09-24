@@ -14,6 +14,7 @@ import com.twoclock.gitconnect.domain.board.repository.BoardFileRepository;
 import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
 import com.twoclock.gitconnect.domain.like.repository.LikeRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
+import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
@@ -101,7 +102,7 @@ public class BoardService {
         if (board.getCategory().equals(Category.BD3)) {
             Member member = validateMember(githubId);
 
-            if (!member.getId().equals(board.getMember().getId())) {
+            if (member.getRole().equals(Role.ROLE_USER) && !member.getId().equals(board.getMember().getId())) {
                 throw new CustomException(ErrorCode.NOT_USING_REPORT_BOARD);
             }
         }
