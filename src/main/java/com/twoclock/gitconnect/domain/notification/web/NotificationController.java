@@ -32,6 +32,14 @@ public class NotificationController {
         return RestResponse.OK();
     }
 
+    @DeleteMapping("{notificationId}")
+    public RestResponse deleteNotification(@PathVariable Long notificationId,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
+        String githubId = userDetails.getUsername();
+        notificationService.deleteNotification(notificationId, githubId);
+        return RestResponse.OK();
+    }
+
     @GetMapping
     public DeferredResult<List<NotificationRespDto>> getNotificationList(@AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();

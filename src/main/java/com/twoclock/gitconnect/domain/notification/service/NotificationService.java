@@ -42,6 +42,13 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Transactional
+    public void deleteNotification(Long notificationId, String githubId) {
+        Member member = validateMember(githubId);
+        Notification notification = validateNotification(notificationId, member);
+        notificationRepository.delete(notification);
+    }
+
     @Transactional(readOnly = true)
     public DeferredResult<List<NotificationRespDto>> getNotificationList(String githubId) {
         DeferredResult<List<NotificationRespDto>> deferredResult = new DeferredResult<>(60000L);
