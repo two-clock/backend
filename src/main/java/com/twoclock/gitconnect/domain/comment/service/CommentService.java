@@ -51,7 +51,7 @@ public class CommentService {
         commentRepository.save(comment);
 
         if (!board.getMember().equals(member)) {
-            notificationService.addNotificationInfo(member, NotificationType.COMMENT);
+            notificationService.addNotificationInfo(board.getMember(), NotificationType.COMMENT,  member.getLogin());
         }
     }
 

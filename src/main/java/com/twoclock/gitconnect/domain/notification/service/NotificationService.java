@@ -73,11 +73,11 @@ public class NotificationService {
     }
 
     @Transactional
-    public void addNotificationInfo(Member member, NotificationType type) {
+    public void addNotificationInfo(Member member, NotificationType type, String userId) {
         Notification notification = Notification.builder()
                 .member(member)
                 .type(type)
-                .message(member.getLogin() + type.getMessage())
+                .message(userId + type.getMessage())
                 .build();
         notificationRepository.save(notification);
         notifyUser(member);

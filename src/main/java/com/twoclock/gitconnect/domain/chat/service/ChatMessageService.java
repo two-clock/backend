@@ -40,7 +40,7 @@ public class ChatMessageService {
                 .build();
       
         if(!chatMessage.getSenderMember().equals(member)) {
-            notificationService.addNotificationInfo(member, NotificationType.CHAT);
+            notificationService.addNotificationInfo(chatRoom.getReceivedMember(), NotificationType.CHAT, member.getLogin());
         }
       
         ChatMessage savedMessage = chatMessageRepository.save(chatMessage);

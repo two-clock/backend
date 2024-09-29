@@ -56,7 +56,7 @@ public class LikeService {
         likeRepository.save(likes);
 
         if(!board.getMember().equals(member)) {
-            notificationService.addNotificationInfo(member, NotificationType.LIKES);
+            notificationService.addNotificationInfo(board.getMember(), NotificationType.LIKES,  member.getLogin());
         }
     }
 
