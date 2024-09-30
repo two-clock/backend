@@ -8,10 +8,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@SQLDelete(sql = "UPDATE notification SET is_delete = true WHERE id = ?")
+@Where(clause = "is_delete = false")
 public class Notification extends BaseEntity {
 
     @Id
@@ -31,6 +35,8 @@ public class Notification extends BaseEntity {
     private boolean isRead = false;
 
     private boolean isSent = false;
+
+    private final boolean isDelete = false;
 
     @Builder
     public Notification(Member member, NotificationType type, String message) {

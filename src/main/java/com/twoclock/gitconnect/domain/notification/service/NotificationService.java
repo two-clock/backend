@@ -42,40 +42,42 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Transactional
+    public void deleteNotification(Long notificationId, String githubId) {
+        Member member = validateMember(githubId);
+        Notification notification = validateNotification(notificationId, member);
+        notificationRepository.delete(notification);
+    }
+
     @Transactional(readOnly = true)
     public DeferredResult<List<NotificationRespDto>> getNotificationList(String githubId) {
         DeferredResult<List<NotificationRespDto>> deferredResult = new DeferredResult<>(60000L);
 
         Member member = validateMember(githubId);
         List<Notification> notifications = notificationRepository.findByMemberAndIsSentFalseOrderByCreatedDateTimeDesc(member);
-        System.out.println("알림 목록 조회: " + notifications.size());
 
         if (!notifications.isEmpty()) {
-            System.out.println("새로운 알림이 있으면 바로 응답");
             deferredResult.setResult(toMapNotificationResp(notifications));
         } else {
-            System.out.println("새로운 알림이 없으면 대기 목록에 추가");
             waitingUsers.computeIfAbsent(member, k -> new ArrayList<>()).add(deferredResult);
         }
 
         deferredResult.onTimeout(() -> {
-            System.out.println("타임 아웃으로 인한 빈 알람 반환");
             deferredResult.setResult(new ArrayList<>());
             removeWaitingUser(member, deferredResult);
         });
 
-        System.out.println("요청이 완료되면 대기 목록에서 제거");
         deferredResult.onCompletion(() -> removeWaitingUser(member, deferredResult));
 
         return deferredResult;
     }
 
     @Transactional
-    public void addNotificationInfo(Member member, NotificationType type) {
+    public void addNotificationInfo(Member member, NotificationType type, String userId) {
         Notification notification = Notification.builder()
                 .member(member)
                 .type(type)
-                .message(member.getLogin() + type.getMessage())
+                .message(userId + type.getMessage())
                 .build();
         notificationRepository.save(notification);
         notifyUser(member);
@@ -84,7 +86,6 @@ public class NotificationService {
     private void notifyUser(Member member) {
         List<Notification> notifications = notificationRepository.findByMemberAndIsSentFalseOrderByCreatedDateTimeDesc(member);
         if (!notifications.isEmpty()) {
-            System.out.println("알림 전송 후 알림 상태 변경");
             notifications.forEach(n -> n.setSent(true));
             notificationRepository.saveAll(notifications);
         }
@@ -92,7 +93,6 @@ public class NotificationService {
         List<DeferredResult<List<NotificationRespDto>>> userDeferredResults = getAllDeferredResults();
         if (!userDeferredResults.isEmpty()) {
             userDeferredResults.forEach(r -> {
-                System.out.println("대기중인 알림 객체에게 알림 전송");
                 r.setResult(toMapNotificationResp(notifications));
             });
         }
@@ -126,11 +126,9 @@ public class NotificationService {
     private void removeWaitingUser(Member member, DeferredResult<List<NotificationRespDto>> deferredResult) {
         List<DeferredResult<List<NotificationRespDto>>> results = waitingUsers.get(member);
         if (results != null) {
-            System.out.println("대기 목록에서 제거 시도: " + member.getLogin());
             results.remove(deferredResult);
             if (results.isEmpty()) {
                 waitingUsers.remove(member);
-                System.out.println("대기 목록에서 사용자 제거됨: " + member.getLogin());
             }
         }
     }
