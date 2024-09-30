@@ -24,7 +24,7 @@ public class NotificationController {
         return new RestResponse(result);
     }
 
-    @PutMapping("{notificationId}")
+    @PutMapping("/{notificationId}")
     public RestResponse readNotification(@PathVariable Long notificationId,
                                          @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();
@@ -32,7 +32,7 @@ public class NotificationController {
         return RestResponse.OK();
     }
 
-    @DeleteMapping("{notificationId}")
+    @DeleteMapping("/{notificationId}")
     public RestResponse deleteNotification(@PathVariable Long notificationId,
                                            @AuthenticationPrincipal UserDetails userDetails) {
         String githubId = userDetails.getUsername();

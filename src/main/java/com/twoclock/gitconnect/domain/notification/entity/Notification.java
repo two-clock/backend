@@ -32,13 +32,10 @@ public class Notification extends BaseEntity {
 
     private String message;
 
-    @Column(nullable = false)
     private boolean isRead = false;
 
-    @Column(nullable = false)
     private boolean isSent = false;
 
-    @Column(nullable = false)
     private final boolean isDelete = false;
 
     @Builder
