@@ -10,7 +10,7 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${rds.hostname}:${rds.port}/${rds.db.name}
+    url: ${rds.url}
     username: ${rds.username}
     password: ${rds.password}
   jpa:
@@ -21,6 +21,52 @@ spring:
       hibernate:
         default_batch_fetch_size: 100
 
+  data:
+    redis:
+      port: ${redis.port}
+      host:
+    mongodb:
+      uri: ${mongodb.uri}
+
 logging:
   level:
     web: debug
+
+slack:
+  webhook:
+    url: ${slack.webhook.url}
+
+github:
+  client-id: ${github.client-id}
+  client-secret: ${github.client-secret}
+  access-token: ${github.access-token}
+
+management:
+  endpoint:
+    health:
+      show-components: always
+  #      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+    git:
+      mode: full
+  server:
+    port: 8090
+
+
+aws:
+  access:
+    key: ${aws.access.key}
+  secret:
+    key: ${aws.secret.key}
+  s3:
+    bucket: ${aws.s3.bucket}
