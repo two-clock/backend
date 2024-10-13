@@ -1,7 +1,7 @@
 ![image](https://github.com/user-attachments/assets/484c488e-2dbf-4ae6-9595-c476ff5a8cea)
 > 개발자를 위한 Github 계정 및 저장소 정보 공유 서비스
 > <br>  [Git Connect 프로젝트 상세 기획 Notion](https://jjangsky.notion.site/)
-> <br> Serivce : [git-connect.site](https://git-connect.site)
+> <br> Serivce : [git-connect.site](https://www.git-connect.site)
 
 ## 기술 스택
 
