@@ -11,6 +11,7 @@ import com.twoclock.gitconnect.domain.notification.entity.constants.Notification
 import com.twoclock.gitconnect.domain.notification.service.NotificationService;
 import com.twoclock.gitconnect.global.dummy.DummyObject;
 import com.twoclock.gitconnect.global.exception.CustomException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,22 +44,31 @@ class CommentServiceTest extends DummyObject {
     @Mock
     BoardRepository boardRepository;
 
+    private CommentRegistReqDto dto;
+    private Member member;
+    private Board board;
+    private String githubId;
+    private Long boardId;
+
+
 
     @Nested
     @DisplayName("Comment 등록 테스트")
     class SaveCommentTest {
 
+        @BeforeEach
+        void setUp() {
+            githubId = "githubId";
+            boardId = 1L;
+            dto = new CommentRegistReqDto("댓글 내용");
+            member = mockMember(githubId);
+            board = mockBoard(member);
+        }
+
         @DisplayName("댓글을 입력할 경우 정상적으로 등록되어야 한다.")
         @Test
         void saveComment() {
             // given
-            String githubId = "githubId";
-            Long boardId = 1L;
-            CommentRegistReqDto dto = new CommentRegistReqDto("댓글 내용");
-            Member boardOwner = mockMember("boardOwnerGithubId");
-            Member member = mockMember(githubId);
-            Board board = mockBoard(boardOwner);
-
             BDDMockito.given(memberRepository.findByGitHubId(githubId)).willReturn(Optional.ofNullable(member));
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.ofNullable(board));
 
@@ -73,12 +83,6 @@ class CommentServiceTest extends DummyObject {
         @Test
         void notSentNotify() {
             // given
-            String githubId = "githubId";
-            Long boardId = 1L;
-            CommentRegistReqDto dto = new CommentRegistReqDto("댓글 내용");
-            Member member = mockMember(githubId);
-            Board board = mockBoard(member);
-
             BDDMockito.given(memberRepository.findByGitHubId(githubId)).willReturn(Optional.ofNullable(member));
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.ofNullable(board));
 
@@ -94,12 +98,8 @@ class CommentServiceTest extends DummyObject {
         @Test
         void sentNotify() {
             // given
-            String githubId = "githubId";
-            Long boardId = 1L;
-            CommentRegistReqDto dto = new CommentRegistReqDto("댓글 내용");
             Member boardOwner = mockMember("boardOwnerGithubId");
-            Member member = mockMember(githubId);
-            Board board = mockBoard(boardOwner);
+            board = mockBoard(boardOwner);
 
             BDDMockito.given(memberRepository.findByGitHubId(githubId)).willReturn(Optional.ofNullable(member));
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.ofNullable(board));
@@ -116,9 +116,7 @@ class CommentServiceTest extends DummyObject {
         @Test
         void badWordError() {
             // given
-            String githubId = "githubId";
-            Long boardId = 1L;
-            CommentRegistReqDto dto = new CommentRegistReqDto("시발");
+            dto = new CommentRegistReqDto("시발");
 
             // when & then
             assertThatThrownBy(() -> commentService.saveComment(dto, githubId, boardId))
@@ -130,10 +128,6 @@ class CommentServiceTest extends DummyObject {
         @Test
         void notFoundBoardError() {
             // given
-            String githubId = "githubId";
-            Long boardId = 1L;
-            CommentRegistReqDto dto = new CommentRegistReqDto("댓글 내용");
-
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.empty());
 
             // when & then
@@ -146,12 +140,6 @@ class CommentServiceTest extends DummyObject {
         @Test
         void notLoginError() {
             // given
-            String githubId = "githubId";
-            Long boardId = 1L;
-            CommentRegistReqDto dto = new CommentRegistReqDto("댓글 내용");
-            Member member = mockMember(githubId);
-            Board board = mockBoard(member);
-
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.ofNullable(board));
             BDDMockito.given(memberRepository.findByGitHubId(githubId)).willReturn(Optional.empty());
 
