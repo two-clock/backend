@@ -11,6 +11,7 @@ import com.twoclock.gitconnect.domain.notification.entity.constants.Notification
 import com.twoclock.gitconnect.domain.notification.service.NotificationService;
 import com.twoclock.gitconnect.global.dummy.DummyObject;
 import com.twoclock.gitconnect.global.exception.CustomException;
+import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -68,7 +69,7 @@ class CommentServiceTest extends DummyObject {
         @DisplayName("댓글을 입력할 경우 정상적으로 등록되어야 한다.")
         @Test
         void saveComment() {
-            // given
+            // given & stub
             BDDMockito.given(memberRepository.findByGitHubId(githubId)).willReturn(Optional.ofNullable(member));
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.ofNullable(board));
 
@@ -82,7 +83,7 @@ class CommentServiceTest extends DummyObject {
         @DisplayName("댓글을 입력할 경우 작성자와 게시글 작성자가 동일한 경우 알람이 발송되지 않아야 한다.")
         @Test
         void notSentNotify() {
-            // given
+            // given & stub
             BDDMockito.given(memberRepository.findByGitHubId(githubId)).willReturn(Optional.ofNullable(member));
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.ofNullable(board));
 
@@ -101,6 +102,7 @@ class CommentServiceTest extends DummyObject {
             Member boardOwner = mockMember("boardOwnerGithubId");
             board = mockBoard(boardOwner);
 
+            // stub
             BDDMockito.given(memberRepository.findByGitHubId(githubId)).willReturn(Optional.ofNullable(member));
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.ofNullable(board));
 
@@ -121,32 +123,32 @@ class CommentServiceTest extends DummyObject {
             // when & then
             assertThatThrownBy(() -> commentService.saveComment(dto, githubId, boardId))
                     .isInstanceOf(CustomException.class)
-                    .hasMessage("금지어가 포함되어 있습니다.");
+                    .hasMessage(ErrorCode.BAD_WORD.getMessage());
         }
 
         @DisplayName("댓글을 입력할 경우 게시글이 존재하지 않을 경우 에러가 발생해야 한다.")
         @Test
         void notFoundBoardError() {
-            // given
+            // given & stub
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.empty());
 
             // when & then
             assertThatThrownBy(() -> commentService.saveComment(dto, githubId, boardId))
                     .isInstanceOf(CustomException.class)
-                    .hasMessage("해당 게시판을 찾을 수 없습니다.");
+                    .hasMessage(ErrorCode.NOT_FOUND_BOARD.getMessage());
         }
 
         @DisplayName("존재하지 않는 사용자 Key로 댓글을 입력할 경우 에러가 발생해야 한다.")
         @Test
         void notLoginError() {
-            // given
+            // given & stub
             BDDMockito.given(boardRepository.findById(boardId)).willReturn(Optional.ofNullable(board));
             BDDMockito.given(memberRepository.findByGitHubId(githubId)).willReturn(Optional.empty());
 
             // when & then
             assertThatThrownBy(() -> commentService.saveComment(dto, githubId, boardId))
                     .isInstanceOf(CustomException.class)
-                    .hasMessage("찾을 수 없는 회원 계정입니다.");
+                    .hasMessage(ErrorCode.NOT_FOUND_MEMBER.getMessage());
         }
     }
 
