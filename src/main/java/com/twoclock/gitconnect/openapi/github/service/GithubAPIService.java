@@ -8,6 +8,7 @@ import com.twoclock.gitconnect.global.util.RestClientUtil;
 import com.twoclock.gitconnect.openapi.github.constants.GitHubUri;
 import com.twoclock.gitconnect.openapi.github.dto.FollowRespDto;
 import com.twoclock.gitconnect.openapi.github.dto.GitHubTokenDto;
+import com.twoclock.gitconnect.openapi.github.dto.MemberGithubInfoDto;
 import com.twoclock.gitconnect.openapi.github.dto.RepositoryRespDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,14 @@ public class GithubAPIService {
         String result = RestClientUtil.get(GitHubUri.USER_INFO.getUri(), headers);
         return parseMemberLoginResponse(result);
     }
+
+    public MemberGithubInfoDto getGitHubMemberInfo(String gitHubAccessToken, String githubName) {
+        HttpHeaders headers = createHeadersWithAccessToken(gitHubAccessToken);
+        String result = RestClientUtil.get(String.format(GitHubUri.GET_USER_INFO.getUri(), githubName), headers);
+        return parseMemberInfoResponse(result);
+    }
+
+
 
     public GitHubTokenDto getMemberGitHubToken(String code) {
         HttpHeaders headers = createDefaultHeaders();
@@ -128,6 +137,33 @@ public class GithubAPIService {
             throw new RuntimeException("Error parsing GitHub member response", e);
         }
     }
+
+    private MemberGithubInfoDto parseMemberInfoResponse(String result) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(result);
+            String login = jsonNode.get("login").asText();
+            String gitHubId = jsonNode.get("id").asText();
+            String htmlUrl = jsonNode.get("html_url").asText();
+            String avatarUrl = jsonNode.get("avatar_url").asText();
+            String name = jsonNode.get("name").asText();
+            String bio = jsonNode.get("bio").asText();
+            String company = jsonNode.get("company").asText();
+            String location = jsonNode.get("location").asText();
+            String email = jsonNode.get("email").asText();
+            String blog = jsonNode.get("blog").asText();
+            int followers = Integer.parseInt(jsonNode.get("followers").asText());
+            int following = Integer.parseInt(jsonNode.get("following").asText());
+            int publicRepos = Integer.parseInt(jsonNode.get("public_repos").asText());
+            int publicGists = Integer.parseInt(jsonNode.get("public_gists").asText());
+            String createdAt = jsonNode.get("created_at").asText();
+            String updatedAt = jsonNode.get("updated_at").asText();
+            return new MemberGithubInfoDto(login, gitHubId, avatarUrl, name, bio, company, location, htmlUrl, email,
+                    blog, followers, following, publicRepos, publicGists, createdAt, updatedAt);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error parsing GitHub member response", e);
+        }
+    }
+
 
     private GitHubTokenDto parseGithubTokenDto(String result) {
         try {

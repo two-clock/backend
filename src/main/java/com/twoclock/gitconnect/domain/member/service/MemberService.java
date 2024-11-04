@@ -6,6 +6,8 @@ import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
 import com.twoclock.gitconnect.openapi.github.dto.FollowRespDto;
+import com.twoclock.gitconnect.openapi.github.dto.MemberGithubInfoDto;
+import com.twoclock.gitconnect.openapi.github.dto.MemberInfoRespDto;
 import com.twoclock.gitconnect.openapi.github.dto.RepositoryRespDto;
 import com.twoclock.gitconnect.openapi.github.service.GitHubTokenRedisService;
 import com.twoclock.gitconnect.openapi.github.service.GithubAPIService;
@@ -35,6 +37,19 @@ public class MemberService {
         List<RepositoryRespDto> repositories = githubAPIService.getRepositories(githubAccessToken);
 
         return new MemberProfileRespDto(member, followers, followings, repositories);
+    }
+
+    @Transactional(readOnly = true)
+    public MemberInfoRespDto getMemberInfo(String gitHubId, String userGitHubId) {
+        Member userInfo = validateMember(userGitHubId);
+        String name = userInfo.getLogin();
+
+        String githubAccessToken = gitHubTokenRedisService.getGitHubToken(gitHubId).accessToken();
+        MemberGithubInfoDto info = githubAPIService.getGitHubMemberInfo(githubAccessToken, name);
+
+        List<RepositoryRespDto> repositories = githubAPIService.getRepositories(githubAccessToken);
+
+        return new MemberInfoRespDto(info, repositories);
     }
 
     private Member validateMember(String gitHubId) {
