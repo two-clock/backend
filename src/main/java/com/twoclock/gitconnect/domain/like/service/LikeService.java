@@ -71,11 +71,11 @@ public class LikeService {
     }
 
     @Transactional(readOnly = true)
-    public PagingResponse<List<LikesRespDto>> getLikesByBoardId(Long boardId, int page, int size) {
-        Board board = validateBoard(boardId);
+    public PagingResponse<List<LikesRespDto>> getLikesByGithubId(String gitHubId, int page, int size) {
+        Member member = validateMember(gitHubId);
         Pageable pageable = createPageable(page, size);
 
-        Page<Likes> likes = likeRepository.findAllByBoard(board, pageable);
+        Page<Likes> likes = likeRepository.findAllByMemberOrderByCreatedDateTimeDesc(member, pageable);
         List<LikesRespDto> result = likes.stream().map(LikesRespDto::new).toList();
 
         Pagination pagination = PaginationUtil.pageInfo(likes.getTotalElements(), page, size);
