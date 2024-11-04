@@ -30,11 +30,12 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberProfileRespDto getMember(String gitHubId) {
         Member member = validateMember(gitHubId);
+        String name = member.getLogin();
         String githubAccessToken = gitHubTokenRedisService.getGitHubToken(gitHubId).accessToken();
 
         List<FollowRespDto> followings = githubAPIService.getFollowing(githubAccessToken);
         List<FollowRespDto> followers = githubAPIService.getFollowers(githubAccessToken);
-        List<RepositoryRespDto> repositories = githubAPIService.getRepositories(githubAccessToken);
+        List<RepositoryRespDto> repositories = githubAPIService.getRepositories(githubAccessToken, name);
 
         return new MemberProfileRespDto(member, followers, followings, repositories);
     }
@@ -47,7 +48,7 @@ public class MemberService {
         String githubAccessToken = gitHubTokenRedisService.getGitHubToken(gitHubId).accessToken();
         MemberGithubInfoDto info = githubAPIService.getGitHubMemberInfo(githubAccessToken, name);
 
-        List<RepositoryRespDto> repositories = githubAPIService.getRepositories(githubAccessToken);
+        List<RepositoryRespDto> repositories = githubAPIService.getRepositories(githubAccessToken, name);
 
         return new MemberInfoRespDto(info, repositories);
     }

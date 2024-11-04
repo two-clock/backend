@@ -38,7 +38,7 @@ public class GithubAPIService {
 
     public MemberLoginRespDto getGitHubMember(String gitHubAccessToken) {
         HttpHeaders headers = createHeadersWithAccessToken(gitHubAccessToken);
-        String result = RestClientUtil.get(GitHubUri.USER_INFO.getUri(), headers);
+        String result = RestClientUtil.get(GitHubUri.MY_GITHUB_INFO.getUri(), headers);
         return parseMemberLoginResponse(result);
     }
 
@@ -47,8 +47,6 @@ public class GithubAPIService {
         String result = RestClientUtil.get(String.format(GitHubUri.GET_USER_INFO.getUri(), githubName), headers);
         return parseMemberInfoResponse(result);
     }
-
-
 
     public GitHubTokenDto getMemberGitHubToken(String code) {
         HttpHeaders headers = createDefaultHeaders();
@@ -82,9 +80,9 @@ public class GithubAPIService {
         return parseFollowResponse(result);
     }
 
-    public List<RepositoryRespDto> getRepositories(String accessToken) {
+    public List<RepositoryRespDto> getRepositories(String accessToken, String githubName) {
         HttpHeaders headers = createHeadersWithAccessToken(accessToken);
-        String result = RestClientUtil.get(GitHubUri.REPOSITORY_LIST.getUri(), headers);
+        String result = RestClientUtil.get(String.format(GitHubUri.MY_REPOSITORY_LIST.getUri(), githubName), headers);
         return parseRepositoryResponse(result);
     }
 
@@ -200,13 +198,21 @@ public class GithubAPIService {
             arrayNode.forEach(node -> {
                 String name = node.path("name").asText();
                 String fullName = node.path("full_name").asText();
-                String visibility = node.path("visibility").asText();
                 String htmlUrl = node.path("html_url").asText();
                 String description = node.path("description").asText();
                 String createdAt = node.path("created_at").asText();
+                String updatedAt = node.path("updated_at").asText();
+                String pushedAt = node.path("pushed_at").asText();
+                String size = node.path("size").asText();
+                String stargazersCount = node.path("stargazers_count").asText();
+                String watchersCount = node.path("watchers_count").asText();
+                String language = node.path("language").asText();
+                String forksCount = node.path("forks_count").asText();
 
                 repositories.add(
-                        new RepositoryRespDto(name, fullName, visibility, htmlUrl, description, createdAt)
+                        new RepositoryRespDto(name, fullName, htmlUrl, description, createdAt,
+                                updatedAt, pushedAt, size,stargazersCount, watchersCount,
+                                language, forksCount)
                 );
             });
             return repositories;
