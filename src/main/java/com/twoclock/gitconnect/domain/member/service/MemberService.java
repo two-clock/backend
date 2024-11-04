@@ -42,19 +42,24 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public MemberInfoRespDto getMemberInfo(String gitHubId, String userGitHubId) {
-        Member userInfo = validateMember(userGitHubId);
-        String name = userInfo.getLogin();
+        Member userInfo = validateUserLoginName(userGitHubId);
 
         String githubAccessToken = gitHubTokenRedisService.getGitHubToken(gitHubId).accessToken();
-        MemberGithubInfoDto info = githubAPIService.getGitHubMemberInfo(githubAccessToken, name);
+        MemberGithubInfoDto info = githubAPIService.getGitHubMemberInfo(githubAccessToken, userGitHubId);
 
-        List<RepositoryRespDto> repositories = githubAPIService.getRepositories(githubAccessToken, name);
+        List<RepositoryRespDto> repositories = githubAPIService.getRepositories(githubAccessToken, userGitHubId);
 
         return new MemberInfoRespDto(info, repositories);
     }
 
     private Member validateMember(String gitHubId) {
         return memberRepository.findByGitHubId(gitHubId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
+        );
+    }
+
+    private Member validateUserLoginName(String login) {
+        return memberRepository.findByLogin(login).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)
         );
     }
