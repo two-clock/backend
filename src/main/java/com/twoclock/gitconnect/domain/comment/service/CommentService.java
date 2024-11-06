@@ -5,6 +5,7 @@ import com.twoclock.gitconnect.domain.board.repository.BoardRepository;
 import com.twoclock.gitconnect.domain.comment.dto.CommentListRespDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentModifyReqDto;
 import com.twoclock.gitconnect.domain.comment.dto.CommentRegistReqDto;
+import com.twoclock.gitconnect.domain.comment.dto.MyCommentRespDto;
 import com.twoclock.gitconnect.domain.comment.entity.Comment;
 import com.twoclock.gitconnect.domain.comment.repository.CommentRepository;
 import com.twoclock.gitconnect.domain.member.entity.Member;
@@ -90,6 +91,22 @@ public class CommentService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public PagingResponse<List<MyCommentRespDto>> getMyComments(String githubId, int page, int size) {
+        Member member = validateMember(githubId);
+        Pageable pageable = createPageable(page, size);
+
+        Page<Comment> comments = commentRepository.findAllByMember(member, pageable);
+        List<MyCommentRespDto> result = mapMyCommentsToDto(comments);
+
+        Pagination pagination = PaginationUtil.pageInfo(comments.getTotalElements(), page, size);
+
+        return PagingResponse.<List<MyCommentRespDto>>builder()
+                .listData(result)
+                .pagination(pagination)
+                .build();
+    }
+
     private Board validateBoard(Long boardId) {
         return boardRepository.findById(boardId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_BOARD)
@@ -123,6 +140,12 @@ public class CommentService {
     private List<CommentListRespDto> mapCommentsToDto(Page<Comment> comments) {
         return comments.stream()
                 .map(CommentListRespDto::new)
+                .toList();
+    }
+
+    private List<MyCommentRespDto> mapMyCommentsToDto(Page<Comment> comments) {
+        return comments.stream()
+                .map(comment -> new MyCommentRespDto(comment, comment.getBoard()))
                 .toList();
     }
 }

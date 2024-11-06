@@ -1,6 +1,7 @@
 package com.twoclock.gitconnect.domain.member.service;
 
 import com.twoclock.gitconnect.domain.board.service.BoardService;
+import com.twoclock.gitconnect.domain.comment.dto.MyCommentRespDto;
 import com.twoclock.gitconnect.domain.comment.service.CommentService;
 import com.twoclock.gitconnect.domain.like.dto.LikesRespDto;
 import com.twoclock.gitconnect.domain.like.service.LikeService;
@@ -48,7 +49,7 @@ public class MemberService {
         // 작성 게시글 목록
 
         // 작성 댓글 목록
-
+        PagingResponse<List<MyCommentRespDto>> comments = commentService.getMyComments(gitHubId, 1, 10);
 
         // 좋아요 한 목록
         PagingResponse<List<LikesRespDto>> likes = likeService.getLikesByGithubId(gitHubId, 1, 10);
