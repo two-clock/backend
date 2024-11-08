@@ -1,6 +1,6 @@
 package com.twoclock.gitconnect.domain.like.dto;
 
-import com.twoclock.gitconnect.domain.board.entity.Board;
+import com.twoclock.gitconnect.domain.board.dto.BoardResponseDto.BoardRespDto;
 import com.twoclock.gitconnect.domain.like.entity.Likes;
 
 import java.time.LocalDateTime;
@@ -9,7 +9,7 @@ import java.util.List;
 public record LikesRespDto(
         Long id,
         String login,
-        Board board,
+        BoardRespDto board,
         String avatarUrl,
         String name,
         String gitHubId,
@@ -19,7 +19,7 @@ public record LikesRespDto(
         this(
                 likes.getId(),
                 likes.getMember().getLogin(),
-                likes.getBoard(),
+                new BoardRespDto(likes.getBoard()),
                 likes.getMember().getAvatarUrl(),
                 likes.getMember().getName(),
                 likes.getMember().getGitHubId(),
