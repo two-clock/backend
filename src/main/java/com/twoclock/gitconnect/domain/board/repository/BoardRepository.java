@@ -2,6 +2,7 @@ package com.twoclock.gitconnect.domain.board.repository;
 
 import com.twoclock.gitconnect.domain.board.entity.Board;
 import com.twoclock.gitconnect.domain.board.entity.constants.Category;
+import com.twoclock.gitconnect.domain.member.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,4 +33,6 @@ public interface BoardRepository extends
 
     @Query("select b from Board b join fetch b.member left join fetch b.fileList left join fetch b.likeList where b.id = :boardId")
     Optional<Board> findBoardDetailById(@Param("boardId") Long boardId);
+
+    Page<Board> findAllByMember(Member member, Pageable pageable);
 }
