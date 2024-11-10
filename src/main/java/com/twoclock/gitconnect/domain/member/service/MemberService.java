@@ -35,9 +35,9 @@ public class MemberService {
     private final CommentService commentService;
     private final LikeService likeService;
 
-    @Cacheable(value = "getMember", key = "'member:github-id:' + #gitHubId", cacheManager = "redisCacheManager")
+    @Cacheable(value = "getMyInfo", key = "'my-info:github-id:' + #gitHubId", cacheManager = "redisCacheManager")
     @Transactional(readOnly = true)
-    public MyProfileRespDto getMember(String gitHubId) {
+    public MyProfileRespDto getMyInfo(String gitHubId) {
         Member member = validateMember(gitHubId);
         String name = member.getLogin();
         String githubAccessToken = gitHubTokenRedisService.getGitHubToken(gitHubId).accessToken();
@@ -58,6 +58,7 @@ public class MemberService {
         return new MyProfileRespDto(info, repositories, boards.listData(), comments.listData(), likes.listData());
     }
 
+    @Cacheable(value = "getMemberInfo", key = "'user-info:github-id:' + #gitHubId", cacheManager = "redisCacheManager")
     @Transactional(readOnly = true)
     public MemberInfoRespDto getMemberInfo(String gitHubId, String userGitHubId) {
         Member userInfo = validateUserLoginName(userGitHubId);

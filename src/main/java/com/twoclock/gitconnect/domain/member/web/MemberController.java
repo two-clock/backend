@@ -22,7 +22,7 @@ public class MemberController {
     @GetMapping
     public RestResponse getMember(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         String gitHubId = userDetails.getUsername();
-        MyProfileRespDto responseDto = memberService.getMember(gitHubId);
+        MyProfileRespDto responseDto = memberService.getMyInfo(gitHubId);
         return new RestResponse(responseDto);
     }
 
