@@ -1,6 +1,7 @@
 package com.twoclock.gitconnect.domain.board.dto;
 
 import com.twoclock.gitconnect.domain.board.entity.Board;
+import com.twoclock.gitconnect.domain.member.dto.MemberLoginRespDto;
 import com.twoclock.gitconnect.domain.member.entity.Member;
 import lombok.Builder;
 
@@ -13,7 +14,7 @@ public class BoardResponseDto {
             String content,
             String nickname,
             String category,
-            Member member
+            MemberLoginRespDto member
     ) {
         public BoardRespDto(Board board) {
             this(
@@ -22,7 +23,7 @@ public class BoardResponseDto {
                     board.getContent(),
                     board.getNickname(),
                     board.getCategory().name(),
-                    board.getMember()
+                    new MemberLoginRespDto(board.getMember())
             );
         }
 
