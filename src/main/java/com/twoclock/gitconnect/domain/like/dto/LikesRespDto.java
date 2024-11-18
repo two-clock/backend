@@ -24,7 +24,7 @@ public record LikesRespDto(
         this(
                 likes.getId(),
                 likes.getMember().getLogin(),
-                new BoardRespDto(likes.getBoard()),
+                likes.getBoard() != null ? new BoardRespDto(likes.getBoard()) : null,
                 likes.getMember().getAvatarUrl(),
                 likes.getMember().getName(),
                 likes.getMember().getGitHubId(),
