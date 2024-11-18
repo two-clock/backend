@@ -18,12 +18,18 @@ import com.twoclock.gitconnect.domain.member.entity.constants.Role;
 import com.twoclock.gitconnect.domain.member.repository.MemberRepository;
 import com.twoclock.gitconnect.global.exception.CustomException;
 import com.twoclock.gitconnect.global.exception.constants.ErrorCode;
+import com.twoclock.gitconnect.global.model.Pagination;
+import com.twoclock.gitconnect.global.model.PagingResponse;
 import com.twoclock.gitconnect.global.s3.S3Service;
+import com.twoclock.gitconnect.global.util.PaginationUtil;
 import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -135,6 +141,24 @@ public class BoardService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public PagingResponse<List<BoardRespDto>> getMyBoardList(String githubId, int page, int size) {
+        Member member = validateMember(githubId);
+        Pageable pageable = createPageable(page, size);
+
+        Page<Board> myBoardList = boardRepository.findAllByMember(member, pageable);
+        List<BoardRespDto> result = myBoardList.getContent().stream()
+                .map(BoardRespDto::new)
+                .toList();
+
+        Pagination pagination = PaginationUtil.pageInfo(myBoardList.getTotalElements(), page, size);
+
+        return PagingResponse.<List<BoardRespDto>>builder()
+                .listData(result)
+                .pagination(pagination)
+                .build();
+    }
+
     @CacheEvict(value = "getBoardDetail", key = "'board:board-id:' + #boardId", cacheManager = "redisCacheManager")
     @Transactional
     public void deleteBoard(Long boardId, String githubId) {
@@ -216,5 +240,10 @@ public class BoardService {
         if (filtering.check(content)) {
             throw new CustomException(ErrorCode.BAD_WORD);
         }
+    }
+
+    private Pageable createPageable(int page, int size) {
+        int validatedPage = Math.max(0, page - 1);
+        return PageRequest.of(validatedPage, size, Sort.by("createdDateTime").descending());
     }
 }

@@ -1,12 +1,16 @@
 package com.twoclock.gitconnect.domain.like.web;
 
+import com.twoclock.gitconnect.domain.like.dto.LikesRespDto;
 import com.twoclock.gitconnect.domain.like.service.LikeService;
+import com.twoclock.gitconnect.global.model.PagingResponse;
 import com.twoclock.gitconnect.global.model.RestResponse;
 import com.twoclock.gitconnect.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,11 +53,12 @@ public class LikeController {
         return new RestResponse(likeService.getPopularWeekRepository());
     }
 
-//    @GetMapping("/{boardId}")
-//    public RestResponse getLikesByBoardId(@PathVariable("boardId") Long boardId,
-//                                          @RequestParam(value = "page", defaultValue = "0") int page,
-//                                          @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-//        PagingResponse<List<LikesRespDto>> result = likeService.getLikesByBoardId(boardId, page, size);
-//        return new RestResponse(result);
-//    }
+    @GetMapping
+    public RestResponse getMyLikes(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                          @RequestParam(value = "page", defaultValue = "0") int page,
+                                          @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        String githubId = userDetails.getUsername();
+        PagingResponse<List<LikesRespDto>> result = likeService.getLikesByGithubId(githubId, page, size);
+        return new RestResponse(result);
+    }
 }
