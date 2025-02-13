@@ -29,6 +29,9 @@ public class Member extends BaseEntity {
     @Column
     private String name;
 
+    @Column(nullable = false)
+    private final boolean isAgree = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;

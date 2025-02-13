@@ -58,7 +58,7 @@ public class MemberService {
         return new MyProfileRespDto(info, repositories, boards.listData(), comments.listData(), likes.listData());
     }
 
-    @Cacheable(value = "getMemberInfo", key = "'user-info:github-id:' + #gitHubId", cacheManager = "redisCacheManager")
+    @Cacheable(value = "getMemberInfo", key = "'user-info:github-id:' + #userGitHubId", cacheManager = "redisCacheManager")
     @Transactional(readOnly = true)
     public MemberInfoRespDto getMemberInfo(String gitHubId, String userGitHubId) {
         Member userInfo = validateUserLoginName(userGitHubId);
