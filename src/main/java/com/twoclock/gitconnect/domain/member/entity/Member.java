@@ -30,7 +30,7 @@ public class Member extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
-    private final boolean isAgree = false;
+    private boolean isAgree = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -49,5 +49,9 @@ public class Member extends BaseEntity {
         this.login = login;
         this.avatarUrl = avatarUrl;
         this.name = name;
+    }
+
+    public void agree() {
+        this.isAgree = true;
     }
 }

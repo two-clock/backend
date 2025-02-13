@@ -71,6 +71,12 @@ public class MemberService {
         return new MemberInfoRespDto(info, repositories);
     }
 
+    @Transactional
+    public void useServiceAgree(String gitHubId) {
+        Member userInfo = validateMember(gitHubId);
+        userInfo.agree();
+    }
+
     private Member validateMember(String gitHubId) {
         return memberRepository.findByGitHubId(gitHubId).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_MEMBER)

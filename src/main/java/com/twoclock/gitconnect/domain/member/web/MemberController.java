@@ -7,10 +7,7 @@ import com.twoclock.gitconnect.global.security.UserDetailsImpl;
 import com.twoclock.gitconnect.openapi.github.dto.MemberInfoRespDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members")
@@ -32,5 +29,12 @@ public class MemberController {
         String gitHubId = userDetails.getUsername();
         MemberInfoRespDto responseDto = memberService.getMemberInfo(gitHubId, userGitHubId);
         return new RestResponse(responseDto);
+    }
+
+    @PostMapping("/agree")
+    public RestResponse useServiceAgree(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        String gitHubId = userDetails.getUsername();
+        memberService.useServiceAgree(gitHubId);
+        return RestResponse.OK();
     }
 }
